@@ -270,34 +270,63 @@ function getOrderedItinerary(train) {
   function updateMapMarkers() {
     markersLayer.clearLayers();
     let count = 0;
-
-    // Añadir trenes que tienen matching
+    
     idToTrainMap.forEach((trainData, id) => {
         const [lng, lat] = trainData.coordinates;
         if (lat && lng) {
             const trainInfo = itineraryList.find(t => t.Tren === trainData.tren);
             const flecha = trainInfo && trainInfo['A/D'] === "A" ? "🔼" : "🔽";
+            
+            // Obtener la hora de paso si existe la próxima parada
+            let horaPaso = '';
+            if (trainData.proximaParada && trainInfo) {
+                horaPaso = trainInfo[trainData.proximaParada] || '';
+            }
+
+            let retardHTML = '';
+            if (horaPaso) {
+              const [h, m] = horaPaso.split(':').map(Number);
+              const horaPrevista = new Date();
+              horaPrevista.setHours(h, m, 0, 0);
+              const ara = new Date();
+
+              const diffMs = ara - horaPrevista;
+              const diffMin = Math.round(diffMs / 60000);
+
+              if (!isNaN(diffMin)) {
+                if (diffMin > 0) {
+                  retardHTML = `<br><span class="label">Retard:</span> <span class="value" style="color:red;">+${diffMin} min</span>`;
+                } else {
+                  retardHTML = `<br><span class="label">A temps</span>`;
+                }
+              }
+            }
 
             const proximaParada = trainData.proximaParada ? 
                 `<div class="info-row">
                     <span class="label">Propera parada:</span> 
                     <span class="value">${trainData.proximaParada}</span>
+                    ${horaPaso ? `<br><span class="label">Hora:</span> 
+                    <span class="value">${horaPaso}</span>` : ''}
+                    ${retardHTML}
                 </div>` : '';
 
+            // Añadir el campo tipus_unitat al popup
             const tipusUnitat = trainData.tipus_unitat || 'Desconegut';
-
+    
             const marker = L.marker([lat, lng], {
                 icon: trainIcon
             }).bindTooltip(`${flecha} ${trainData.tren}`, {
                 permanent: true,
                 direction: 'top',
                 offset: [4, -15],
-                className: (trainData.en_hora === true) 
+                /*className: trainData.en_hora === true ? 'leaflet-tooltip tooltip-verde' : 'leaflet-tooltip tooltip-vermell'*/
+                className: (trainData.en_hora === true || (retardHTML.includes('+') && parseInt(retardHTML.match(/\+(\d+)/)?.[1]) <= 2)) 
                     ? 'leaflet-tooltip tooltip-verde' 
                     : 'leaflet-tooltip tooltip-vermell'
-            }).bindPopup(`
+              }).bindPopup(`
                 <div class="custom-popup">
-                    <h3>🚆 Tren ${trainData.tren}</h3>
+                    <h3>🚆 <a href="#" onclick="showItinerary('${trainData.tren}'); return false;">Tren ${trainData.tren}</a></h3>
                     <div class="info-row">
                         <span class="label">Línea:</span>
                         <span class="value">${trainInfo ? trainInfo.Linia : 'N/A'}</span>
@@ -309,45 +338,16 @@ function getOrderedItinerary(train) {
                     </div>
                 </div>
             `, {
-                offset: L.point(4, 0)
+                offset: L.point(4, 0)  // Desplaza el popup 20 píxeles hacia arriba
             });
-
+            
             markersLayer.addLayer(marker);
             count++;
         }
     });
-
-    // Añadir trenes sin matching
-    idToTrainMap.forEach((trainData, id) => {
-        const [lng, lat] = trainData.coordinates;
-        if (lat && lng && !trainData.tren) {
-            const linia = trainData.lin || 'Desconeguda';
-
-            const marker = L.marker([lat, lng], {
-                icon: trainIcon
-            }).bindTooltip(`Línea: ${linia}`, {
-                permanent: true,
-                direction: 'top',
-                offset: [4, -15],
-                className: 'leaflet-tooltip tooltip-amarillo'
-            }).bindPopup(`
-                <div class="custom-popup">
-                    <h3>🚆 Tren sense matching</h3>
-                    <div class="info-row">
-                        <span class="label">Línea:</span>
-                        <span class="value">${linia}</span>
-                    </div>
-                </div>
-            `, {
-                offset: L.point(4, 0)
-            });
-
-            markersLayer.addLayer(marker);
-        }
-    });
-
+    
     document.getElementById("matchedCount").textContent = count;
-}
+  }
 
     function resetData() {
       itineraryList = [];
