@@ -367,7 +367,7 @@ function matchTrains(itineraryList, apiTrains, horaActual) {
   async function refresh() {
     if (itineraryList.length === 0) {
         console.log("No hi ha itineraris carregats");
-        alert("Primer sel:lecciona un arxiu de serveis");
+        alert("Primer selecciona un arxiu de servei");
         return;
     }
 
