@@ -43,7 +43,7 @@ async function fetchAllTrains() {
       const response = await fetch('https://geotren.fgc.cat/tracker/trens.geojson');
       
       if (!response.ok) {
-          console.error('Error en la descarga del fitxer:', response.status);
+          console.error('Error al descarregar el fitxer:', response.status);
           return [];
       }
       
@@ -58,7 +58,7 @@ async function fetchAllTrains() {
       
       return trains;
   } catch (error) {
-      console.error('Error al descargar el fitxer:', error);
+      console.error('Error al descarregar el fitxer:', error);
       return [];
   }
 }
@@ -273,116 +273,87 @@ function matchTrains(itineraryList, apiTrains, horaActual) {
 }
 
   // Función para actualizar los marcadores del mapa según los trenes activos y sus datos actualizados
-  function updateMapMarkers(apiTrains) {
+  function updateMapMarkers() {
     markersLayer.clearLayers();
     let count = 0;
     
-    // Iterar sobre todos los trenes obtenidos de la API, tanto emparejados como no emparejados
-    for (const api of apiTrains) {
-        const apiId = api.id;
-        let trainData;
-        let isMatched = false;
-        if (idToTrainMap.has(apiId)) {
-            trainData = idToTrainMap.get(apiId);
-            isMatched = true;
-        } else {
-            // Crear datos para tren no emparejado utilizando datos de la API
-            trainData = {
-                tren: api.lin, // Se utiliza el campo "lin:" para mostrar en el tooltip
-                coordinates: api.geometry ? api.geometry.coordinates : api.coordinates,
-                en_hora: api.en_hora,
-                proximaParada: null
-            };
-        }
-        
+    idToTrainMap.forEach((trainData, id) => {
         const [lng, lat] = trainData.coordinates;
         if (lat && lng) {
-            // Determinar la flecha según la dirección
-            let flecha = isMatched ? 
-                ( (itineraryList.find(t => t.Tren === trainData.tren)?.['A/D'] === "A") ? "🔼" : "🔽" )
-                : ( api.dir === "A" ? "🔼" : "🔽" );
+            const trainInfo = itineraryList.find(t => t.Tren === trainData.tren);
+            const flecha = trainInfo && trainInfo['A/D'] === "A" ? "🔼" : "🔽";
             
-            let retardHTML = '';
+            // Obtener la hora de paso si existe la próxima parada
             let horaPaso = '';
-            if (isMatched) {
-                const trainInfo = itineraryList.find(t => t.Tren === trainData.tren);
-                if (trainData.proximaParada && trainInfo) {
-                    horaPaso = trainInfo[trainData.proximaParada] || '';
-                }
-                if (horaPaso) {
-                    const [h, m] = horaPaso.split(':').map(Number);
-                    const horaPrevista = new Date();
-                    horaPrevista.setHours(h, m, 0, 0);
-                    const ara = new Date();
-                    const diffMs = ara - horaPrevista;
-                    const diffMin = Math.round(diffMs / 60000);
-                    if (!isNaN(diffMin)) {
-                        if (diffMin > 0) {
-                            retardHTML = `<br><span class="label">Retard:</span> <span class="value" style="color:red;">+${diffMin} min</span>`;
-                        } else {
-                            retardHTML = `<br><span class="label">A temps</span>`;
-                        }
-                    }
-                }
+            if (trainData.proximaParada && trainInfo) {
+                horaPaso = trainInfo[trainData.proximaParada] || '';
             }
-            
-            // Tooltip: si está emparejado se muestra el nombre del tren, sino se muestra el campo "lin:"
-            const tooltipText = isMatched ? `${flecha} ${trainData.tren}` : `${flecha} ${api.lin}`;
-            
-            // Popup: contenido varía según si está emparejado o no
-            const popupContent = isMatched ?
-                `
+
+            let retardHTML = '';
+            if (horaPaso) {
+              const [h, m] = horaPaso.split(':').map(Number);
+              const horaPrevista = new Date();
+              horaPrevista.setHours(h, m, 0, 0);
+              const ara = new Date();
+
+              const diffMs = ara - horaPrevista;
+              const diffMin = Math.round(diffMs / 60000);
+
+              if (!isNaN(diffMin)) {
+                if (diffMin > 0) {
+                  retardHTML = `<br><span class="label">Retard:</span> <span class="value" style="color:red;">+${diffMin} min</span>`;
+                } else {
+                  retardHTML = `<br><span class="label">A temps</span>`;
+                }
+              }
+            }
+
+            const proximaParada = trainData.proximaParada ? 
+                `<div class="info-row">
+                    <span class="label">Propera parada:</span> 
+                    <span class="value">${trainData.proximaParada}</span>
+                    ${horaPaso ? `<br><span class="label">Hora:</span> 
+                    <span class="value">${horaPaso}</span>` : ''}
+                    ${retardHTML}
+                </div>` : '';
+
+            // Añadir el campo tipus_unitat al popup
+            const tipusUnitat = trainData.tipus_unitat || 'Desconegut';
+    
+            const marker = L.marker([lat, lng], {
+                icon: trainIcon
+            }).bindTooltip(`${flecha} ${trainData.tren}`, {
+                permanent: true,
+                direction: 'top',
+                offset: [4, -15],
+                /*className: trainData.en_hora === true ? 'leaflet-tooltip tooltip-verde' : 'leaflet-tooltip tooltip-vermell'*/
+                className: (trainData.en_hora === true || (retardHTML.includes('+') && parseInt(retardHTML.match(/\+(\d+)/)?.[1]) <= 2)) 
+                    ? 'leaflet-tooltip tooltip-verde' 
+                    : 'leaflet-tooltip tooltip-vermell'
+              }).bindPopup(`
                 <div class="custom-popup">
                     <h3>🚆 <a href="#" onclick="showItinerary('${trainData.tren}'); return false;">Tren ${trainData.tren}</a></h3>
                     <div class="info-row">
                         <span class="label">Línea:</span>
-                        <span class="value">${itineraryList.find(t => t.Tren === trainData.tren)?.Linia || 'N/A'}</span>
+                        <span class="value">${trainInfo ? trainInfo.Linia : 'N/A'}</span>
                     </div>
-                    ${trainData.proximaParada ? `
-                    <div class="info-row">
-                        <span class="label">Propera parada:</span> 
-                        <span class="value">${trainData.proximaParada}</span>
-                        ${horaPaso ? `<br><span class="label">Hora:</span> 
-                        <span class="value">${horaPaso}</span>` : ''}
-                        ${retardHTML}
-                    </div>` : ''}
+                    ${proximaParada}
                     <div class="info-row">
                         <span class="label">Tipus Unitat:</span>
-                        <span class="value">${trainData.tipus_unitat || 'Desconegut'}</span>
+                        <span class="value">${tipusUnitat}</span>
                     </div>
                 </div>
-                `
-                :
-                `
-                <div class="custom-popup">
-                    <h3>🚆 Tren no emparejat</h3>
-                    <div class="info-row">
-                        <span class="label">Línea:</span>
-                        <span class="value">${api.lin}</span>
-                    </div>
-                </div>
-                `;
-            
-            const marker = L.marker([lat, lng], {
-                icon: trainIcon
-            }).bindTooltip(tooltipText, {
-                permanent: true,
-                direction: 'top',
-                offset: [4, -15],
-                className: (trainData.en_hora === true || (retardHTML.includes('+') && parseInt(retardHTML.match(/\+(\d+)/)?.[1]) <= 2)) 
-                    ? 'leaflet-tooltip tooltip-verde' 
-                    : 'leaflet-tooltip tooltip-vermell'
-            }).bindPopup(popupContent, {
-                offset: L.point(4, 0)
+            `, {
+                offset: L.point(4, 0)  // Desplaza el popup 20 píxeles hacia arriba
             });
             
             markersLayer.addLayer(marker);
             count++;
         }
-    }
+    });
     
     document.getElementById("matchedCount").textContent = count;
-}
+  }
 
   // Función para resetear los datos del itinerario, eliminando datos actuales y marcadores
   function resetData() {
@@ -395,8 +366,8 @@ function matchTrains(itineraryList, apiTrains, horaActual) {
   // Función para actualizar la información (descarga y procesamiento de trenes) y refrescar el mapa cada 10 segundos
   async function refresh() {
     if (itineraryList.length === 0) {
-        console.log("No hay itinerarios cargados");
-        alert("Primero carga un archivo JSON con itinerarios");
+        console.log("No hi ha itineraris carregats");
+        alert("Primer sel:lecciona un arxiu de serveis");
         return;
     }
 
@@ -422,8 +393,7 @@ function matchTrains(itineraryList, apiTrains, horaActual) {
         console.log("Estado final de idToTrainMap:", idToTrainMap.size);
         console.log("Contenido de idToTrainMap:", Array.from(idToTrainMap.entries()));
 
-        // Se pasa la lista completa de trenes de la API a updateMapMarkers
-        updateMapMarkers(apiTrains);
+        updateMapMarkers();
     } catch (error) {
         console.error('Error en refresh:', error);
     }
@@ -447,15 +417,15 @@ function matchTrains(itineraryList, apiTrains, horaActual) {
       
       const response = await fetch(fileName);
       if (!response.ok) {
-        throw new Error(`Error al cargar el archivo: ${fileName}`);
+        throw new Error(`Error al carregar arxiu: ${fileName}`);
       };
       
       const data = await response.json();
       itineraryList = data;
-      alert(`Itinerario ${fileName} cargado correctamente.`);
+      alert(`Itinerari ${fileName} carregat correctament.`);
       refresh();
     } catch (error) {
-      alert(`Error al cargar el archivo ${fileName}: ${error.message}`);
+      alert(`Error al carregar arxiu ${fileName}: ${error.message}`);
       this.classList.remove('active');
     }
   });
