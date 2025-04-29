@@ -332,7 +332,7 @@ function matchTrains(itineraryList, apiTrains, horaActual) {
                     : 'leaflet-tooltip tooltip-vermell'
               }).bindPopup(`
                 <div class="custom-popup">
-                    <h3>🚆 <a href="#" onclick="showItinerary('${trainData.tren}'); return false;">Tren ${trainData.tren}</a></h3>
+                    <h3>🚆 <a href="#" onclick="showItinerary('${trainData.tren}'); return false;">Horari ${trainData.tren}</a></h3>
                     <div class="info-row">
                         <span class="label">Línea:</span>
                         <span class="value">${trainInfo ? trainInfo.Linia : 'N/A'}</span>
