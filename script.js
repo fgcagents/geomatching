@@ -19,7 +19,7 @@ function initMap() {
 
     
     // Capa base de CARTO
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    L.tileLayer('https://tile.jawg.io/43965150-ada4-4b5a-ac7a-b55f76fb8da7/{z}/{x}/{y}{r}.png?access-token=aDtkeyf8BaiAQcpFkFzvBps7HS77uBqI7R6ueHmKR7pYrYBExgKAUUPmRj358SnC', {
       attribution: '&copy; J_E_O &copy; OpenStreetMap &copy; CARTO',
       subdomains: 'abcd',
       maxZoom: 19
