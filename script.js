@@ -282,12 +282,17 @@ function matchTrains(itineraryList, apiTrains, horaActual) {
             const flecha = trainInfo && trainInfo['A/D'] === "A" ? "🔼" : "🔽";
             
             // Obtener la hora de paso si existe la próxima parada
-            let horaPaso = '';
+           let horaPaso = '';
             if (trainData.proximaParada && trainInfo) {
                 horaPaso = trainInfo[trainData.proximaParada] || '';
             }
 
             let retardHTML = '';
+            if (horaPaso) {
+                retardHTML = calcularRetardActual(trainInfo, trainData);
+            }
+
+           /* let retardHTML = '';
             if (horaPaso) {
               const [h, m] = horaPaso.split(':').map(Number);
               const horaPrevista = new Date();
@@ -304,7 +309,7 @@ function matchTrains(itineraryList, apiTrains, horaActual) {
                   retardHTML = `<br><span class="label">A temps</span>`;
                 }
               }
-            }
+            }*/
 
             const proximaParada = trainData.proximaParada ? 
                 `<div class="info-row">
@@ -454,3 +459,35 @@ function showItinerary(trainName) {
   // Inicializar el mapa al cargar
   initMap();
   setInterval(refresh, 10000);
+
+  function calcularRetardActual(trainInfo, trainData) {
+    const ara = new Date();
+    const itinerarioOrdenado = getOrderedItinerary(trainInfo);
+    const estacioActualIndex = itinerarioOrdenado.findIndex(p => p.estacio === trainData.proximaParada);
+    
+    // Si no encontramos la estación actual, retornamos sin retraso
+    if (estacioActualIndex === -1) return '';
+
+    // Obtenemos la hora prevista para la próxima parada
+    const { hora } = itinerarioOrdenado[estacioActualIndex];
+    const [h, m] = hora.split(':').map(Number);
+    const horaPrevista = new Date();
+    horaPrevista.setHours(h, m, 0, 0);
+
+    // Ajuste para horarios después de medianoche
+    if (horaPrevista > ara && ara.getHours() < 4) {
+        horaPrevista.setDate(horaPrevista.getDate() - 1);
+    }
+
+    const diffMs = ara - horaPrevista;
+    const diffMin = Math.round(diffMs / 60000);
+
+    let retardHTML = '';
+    if (diffMin > 2) { // Solo mostramos retraso si es mayor a 2 minutos
+        retardHTML = `<br><span class="label">Retard:</span> <span class="value" style="color:red;">+${diffMin} min</span>`;
+    } else {
+        retardHTML = `<br><span class="label">A temps</span>`;
+    }
+
+    return retardHTML;
+}
