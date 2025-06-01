@@ -483,7 +483,7 @@ function showItinerary(trainName) {
     const diffMin = Math.round(diffMs / 60000);
 
     let retardHTML = '';
-    if (diffMin > 2) { // Solo mostramos retraso si es mayor a 2 minutos
+    if (diffMin > 0) { // Solo mostramos retraso si es mayor a 2 minutos
         retardHTML = `<br><span class="label">Retard:</span> <span class="value" style="color:red;">+${diffMin} min</span>`;
     } else {
         retardHTML = `<br><span class="label">A temps</span>`;
