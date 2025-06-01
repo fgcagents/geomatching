@@ -282,34 +282,68 @@ function matchTrains(itineraryList, apiTrains, horaActual) {
             const flecha = trainInfo && trainInfo['A/D'] === "A" ? "🔼" : "🔽";
             
             // Obtener la hora de paso si existe la próxima parada
-           let horaPaso = '';
+            let horaPaso = '';
             if (trainData.proximaParada && trainInfo) {
                 horaPaso = trainInfo[trainData.proximaParada] || '';
             }
 
-            let retardHTML = '';
-            if (horaPaso) {
-                retardHTML = calcularRetardActual(trainInfo, trainData);
-            }
+            // ...existing code...
+                let retardHTML = '';
+                if (horaPaso && trainInfo) {
+                  // Obtenim l'itinerari ordenat
+                  const itinerari = getOrderedItinerary(trainInfo);
+                  let retardAcumulat = 0;
+                  let paradaAnteriorHoraReal = null;
 
-           /* let retardHTML = '';
-            if (horaPaso) {
-              const [h, m] = horaPaso.split(':').map(Number);
-              const horaPrevista = new Date();
-              horaPrevista.setHours(h, m, 0, 0);
-              const ara = new Date();
+                  // Busquem la posició de la propera parada
+                  const idxPropera = itinerari.findIndex(p => p.estacio === trainData.proximaParada);
 
-              const diffMs = ara - horaPrevista;
-              const diffMin = Math.round(diffMs / 60000);
+                  // Recórrer totes les parades fins la propera
+                  for (let i = 0; i <= idxPropera; i++) {
+                    const parada = itinerari[i];
+                    if (!parada) continue;
+                    const [h, m] = parada.hora.split(':').map(Number);
+                    const horaPrevista = new Date();
+                    horaPrevista.setHours(h, m, 0, 0);
 
-              if (!isNaN(diffMin)) {
-                if (diffMin > 0) {
-                  retardHTML = `<br><span class="label">Retard:</span> <span class="value" style="color:red;">+${diffMin} min</span>`;
-                } else {
-                  retardHTML = `<br><span class="label">A temps</span>`;
+                    // Si és la primera parada, suposem que surt puntual
+                    if (i === 0) {
+                      paradaAnteriorHoraReal = new Date(horaPrevista);
+                      continue;
+                    }
+
+                    // Simulem l'hora real d'arribada a aquesta parada
+                    // Hora real = hora real anterior + temps previst entre parades + retard acumulat
+                    const paradaAnterior = itinerari[i - 1];
+                    const [hAnt, mAnt] = paradaAnterior.hora.split(':').map(Number);
+                    const horaPrevistaAnterior = new Date();
+                    horaPrevistaAnterior.setHours(hAnt, mAnt, 0, 0);
+
+                    // Temps previst entre parades (en ms)
+                    const tempsPrevist = horaPrevista - horaPrevistaAnterior;
+
+                    // Hora real d'arribada a aquesta parada
+                    paradaAnteriorHoraReal = new Date(paradaAnteriorHoraReal.getTime() + tempsPrevist + retardAcumulat * 60000);
+
+                    // Retard a aquesta parada
+                    const retardAquestaParada = Math.round((paradaAnteriorHoraReal - horaPrevista) / 60000);
+
+                    // Si la parada és la propera, mostrem el retard acumulat
+                    if (i === idxPropera) {
+                      if (!isNaN(retardAquestaParada)) {
+                        if (retardAquestaParada > 0) {
+                          retardHTML = `<br><span class="label">Retard acumulat:</span> <span class="value" style="color:red;">+${retardAquestaParada} min</span>`;
+                        } else {
+                          retardHTML = `<br><span class="label">A temps</span>`;
+                        }
+                      }
+                    }
+
+                    // Actualitzem el retard acumulat
+                    retardAcumulat = retardAquestaParada;
+                  }
                 }
-              }
-            }*/
+                // ...existing code...
 
             const proximaParada = trainData.proximaParada ? 
                 `<div class="info-row">
@@ -459,35 +493,3 @@ function showItinerary(trainName) {
   // Inicializar el mapa al cargar
   initMap();
   setInterval(refresh, 10000);
-
-  function calcularRetardActual(trainInfo, trainData) {
-    const ara = new Date();
-    const itinerarioOrdenado = getOrderedItinerary(trainInfo);
-    const estacioActualIndex = itinerarioOrdenado.findIndex(p => p.estacio === trainData.proximaParada);
-    
-    // Si no encontramos la estación actual, retornamos sin retraso
-    if (estacioActualIndex === -1) return '';
-
-    // Obtenemos la hora prevista para la próxima parada
-    const { hora } = itinerarioOrdenado[estacioActualIndex];
-    const [h, m] = hora.split(':').map(Number);
-    const horaPrevista = new Date();
-    horaPrevista.setHours(h, m, 0, 0);
-
-    // Ajuste para horarios después de medianoche
-    if (horaPrevista > ara && ara.getHours() < 4) {
-        horaPrevista.setDate(horaPrevista.getDate() - 1);
-    }
-
-    const diffMs = ara - horaPrevista;
-    const diffMin = Math.round(diffMs / 60000);
-
-    let retardHTML = '';
-    if (diffMin > 2) { // Solo mostramos retraso si es mayor a 2 minutos
-        retardHTML = `<br><span class="label">Retard:</span> <span class="value" style="color:red;">+${diffMin} min</span>`;
-    } else {
-        retardHTML = `<br><span class="label">A temps</span>`;
-    }
-
-    return retardHTML;
-}
