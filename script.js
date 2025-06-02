@@ -271,73 +271,65 @@ function getOrderedItinerary(train) {
     markersLayer.clearLayers();
     let count = 0;
 
-    // Mapa para almacenar el retraso inicial de cada tren
-    const initialDelayMap = new Map();
-    
+    // Mapa para almacenar el retraso acumulado de cada tren
+    const trainDelays = new Map();
+
     idToTrainMap.forEach((trainData, id) => {
         const [lng, lat] = trainData.coordinates;
         if (lat && lng) {
             const trainInfo = itineraryList.find(t => t.Tren === trainData.tren);
             const flecha = trainInfo && trainInfo['A/D'] === "A" ? "🔼" : "🔽";
-            
-            // Obtener la hora de paso si existe la próxima parada
-            let horaPaso = '';
-            if (trainData.proximaParada && trainInfo) {
-                horaPaso = trainInfo[trainData.proximaParada] || '';
-            }
 
             let retardHTML = '';
-            let currentDelay = 0; // Variable para almacenar el retraso actual
+            let accumulatedDelay = 0;
 
-            if (horaPaso) {
-              const [h, m] = horaPaso.split(':').map(Number);
-              const horaPrevista = new Date();
-              horaPrevista.setHours(h, m, 0, 0);
-              const ara = new Date();
+            // Calcular el retraso acumulado basado en el itinerario completo
+            if (trainInfo) {
+                const itinerarioOrdenado = getOrderedItinerary(trainInfo);
+                let totalDelay = 0;
 
-              const diffMs = ara - horaPrevista;
-              const diffMin = Math.round(diffMs / 60000);
+                for (const parada of itinerarioOrdenado) {
+                    const horaProgramada = parada.hora;
+                    const [h, m] = horaProgramada.split(':').map(Number);
+                    const horaPrevista = new Date();
+                    horaPrevista.setHours(h, m, 0, 0);
+                    const ara = new Date();
 
-              if (!isNaN(diffMin)) {
-                // Si es la primera vez que vemos este tren, guardamos el retraso inicial
-                if (!initialDelayMap.has(trainData.tren)) {
-                  initialDelayMap.set(trainData.tren, diffMin);
+                    const diffMs = ara - horaPrevista;
+                    const diffMin = Math.round(diffMs / 60000);
+                    totalDelay += diffMin;
                 }
+                accumulatedDelay = Math.round(totalDelay / itinerarioOrdenado.length);
 
-                // Obtenemos el retraso inicial almacenado
-                currentDelay = initialDelayMap.get(trainData.tren);
-
-                if (diffMin > 0) {
-                  retardHTML = `<br><span class="label">Retard:</span> <span class="value" style="color:red;">+${currentDelay} min</span>`;
+                if (accumulatedDelay > 0) {
+                    retardHTML = `<br><span class="label">Retraso acumulado:</span> <span class="value" style="color:red;">+${accumulatedDelay} min</span>`;
+                } else if (accumulatedDelay < 0) {
+                    retardHTML = `<br><span class="label">Adelanto acumulado:</span> <span class="value" style="color:green;">${accumulatedDelay} min</span>`;
                 } else {
-                  retardHTML = `<br><span class="label">A temps</span>`;
+                    retardHTML = `<br><span class="label">A tiempo</span>`;
                 }
-              }
             }
 
-            const proximaParada = trainData.proximaParada ? 
+            const proximaParada = trainData.proximaParada ?
                 `<div class="info-row">
-                    <span class="label">Propera parada:</span> 
+                    <span class="label">Próxima parada:</span>
                     <span class="value">${trainData.proximaParada}</span>
-                    ${horaPaso ? `<br><span class="label">Hora:</span> 
-                    <span class="value">${horaPaso}</span>` : ''}
                     ${retardHTML}
                 </div>` : '';
 
             // Añadir el campo tipus_unitat al popup
-            const tipusUnitat = trainData.tipus_unitat || 'Desconegut';
-    
+            const tipusUnitat = trainData.tipus_unitat || 'Desconocido';
+
             const marker = L.marker([lat, lng], {
                 icon: trainIcon
             }).bindTooltip(`${flecha} ${trainData.tren}`, {
                 permanent: true,
                 direction: 'top',
                 offset: [4, -15],
-                /*className: trainData.en_hora === true ? 'leaflet-tooltip tooltip-verde' : 'leaflet-tooltip tooltip-vermell'*/
-                className: (trainData.en_hora === true || (retardHTML.includes('+') && parseInt(retardHTML.match(/\+(\d+)/)?.[1]) <= 2)) 
-                    ? 'leaflet-tooltip tooltip-verde' 
+                className: (trainData.en_hora === true || (retardHTML.includes('+') && parseInt(retardHTML.match(/\+(\d+)/)?.[1]) <= 2))
+                    ? 'leaflet-tooltip tooltip-verde'
                     : 'leaflet-tooltip tooltip-vermell'
-              }).bindPopup(`
+            }).bindPopup(`
                 <div class="custom-popup">
                     <h3>🚆 <a href="#" onclick="showItinerary('${trainData.tren}'); return false;">Tren ${trainData.tren}</a></h3>
                     <div class="info-row">
@@ -353,14 +345,14 @@ function getOrderedItinerary(train) {
             `, {
                 offset: L.point(4, 0)  // Desplaza el popup 20 píxeles hacia arriba
             });
-            
+
             markersLayer.addLayer(marker);
             count++;
         }
     });
-    
+
     document.getElementById("matchedCount").textContent = count;
-  }
+}
 
     function resetData() {
       itineraryList = [];
