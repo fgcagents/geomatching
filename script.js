@@ -10,93 +10,92 @@ let itineraryList = [];
     iconAnchor: [12, 12]
   });
 
-// Función para inicializar el mapa y añadir capas base y de vías férreas
-function initMap() {
-  if (!map) {
-    map = L.map("map", {
-    zoomControl: false
-  }).setView([41.4, 2.1], 11);
+  // Inicializar el mapa
+  function initMap() {
+    if (!map) {
+      map = L.map("map", {
+      zoomControl: false
+    }).setView([41.4, 2.1], 11);
 
-    
-    // Capa base de CARTO
-    L.tileLayer('https://tile.jawg.io/43965150-ada4-4b5a-ac7a-b55f76fb8da7/{z}/{x}/{y}{r}.png?access-token=aDtkeyf8BaiAQcpFkFzvBps7HS77uBqI7R6ueHmKR7pYrYBExgKAUUPmRj358SnC', {
-      attribution: "<a href=\"https://www.jawg.io?utm_medium=map&utm_source=attribution\" target=\"_blank\">&copy; Jawg</a> - <a href=\"https://www.openstreetmap.org?utm_medium=map-attribution&utm_source=jawg\" target=\"_blank\">&copy; OpenStreetMap</a>&nbsp;contributors"
-    }).addTo(map);
+      
+      // Capa base de CARTO
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        attribution: '&copy; J_E_O &copy; OpenStreetMap &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(map);
 
-    // Capa de vías férreas de OpenRailwayMap 
-    L.tileLayer('https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a>',
-      maxZoom: 19,
-      opacity: 0.7
-    }).addTo(map);
+      // Capa de vías férreas de OpenRailwayMap 
+      L.tileLayer('https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a>',
+        maxZoom: 19,
+        opacity: 0.7
+      }).addTo(map);
 
-    markersLayer.addTo(map);
+      markersLayer.addTo(map);
+    }
   }
-}
 
-// Reemplaza la función fetchAllTrains para descargar el geojson desde la web
-async function fetchAllTrains() {
-  try {
-      console.log('Iniciando fetchAllTrains...');
-      const response = await fetch('https://geotren.fgc.cat/tracker/trens.geojson');
-      
-      if (!response.ok) {
-          console.error('Error al descarregar el fitxer:', response.status);
-          return [];
-      }
-      
-      const data = await response.json();
-      const trains = data.features.map(feature => ({
-          ...feature.properties,
-          coordinates: feature.geometry.coordinates
-      }));
-      
-      console.log('Trenes descargados:', trains.length);
-      console.log('Muestra de datos:', trains[0]);
-      
-      return trains;
-  } catch (error) {
-      console.error('Error al descarregar el fitxer:', error);
-      return [];
+  // Reemplaza la función fetchAllTrains para descargar el geojson desde la web
+  async function fetchAllTrains() {
+    try {
+        console.log('Iniciando fetchAllTrains...');
+        const response = await fetch('https://geotren.fgc.cat/tracker/trens.geojson');
+        
+        if (!response.ok) {
+            console.error('Error en la descarga del fitxer:', response.status);
+            return [];
+        }
+        
+        const data = await response.json();
+        const trains = data.features.map(feature => ({
+            ...feature.properties,
+            coordinates: feature.geometry.coordinates
+        }));
+        
+        console.log('Trenes descargados:', trains.length);
+        console.log('Muestra de datos:', trains[0]);
+        
+        return trains;
+    } catch (error) {
+        console.error('Error al descargar el fitxer:', error);
+        return [];
+    }
   }
-}
 
-// Función para convertir un string de hora ("HH:MM") en un objeto Date (solo para hora y minutos)
-function parseHora(horaStr) {
-  const [h, m] = horaStr.split(":").map(Number);
-  return new Date(0, 0, 0, h, m);
-}
-
-// Función para obtener la hora actual en formato Date (con fecha y segundos a 0)
-function getHoraActual() {
-  const now = new Date();
-  return new Date(0, 0, 0, now.getHours(), now.getMinutes());
-}
-
-// Función para parsear las paradas de un formato antiguo o JSON, devolviendo un array de nombres de paradas
-function parseProperesParades(properes) {
-  try {
-      // Si ya es un array (como en el JSON), simplemente mapeamos los valores
-      if (Array.isArray(properes)) {
-          return properes.map(p => p.parada);
-      }
-      // Por compatibilidad, mantenemos el parseo de string si viene en el formato antiguo
-      const parades = "[" + properes + "]";
-      return JSON.parse(parades.replace(/;/g, ",")).map(p => p.parada);
-  } catch (error) {
-      console.error('Error parseando paradas:', error);
-      return [];
+  function parseHora(horaStr) {
+    const [h, m] = horaStr.split(":").map(Number);
+    return new Date(0, 0, 0, h, m);
   }
+
+  function getHoraActual() {
+    const now = new Date();
+    return new Date(0, 0, 0, now.getHours(), now.getMinutes());
+  }
+
+  function parseProperesParades(properes) {
+    try {
+        // Si ya es un array (como en el JSON), simplemente mapeamos los valores
+        if (Array.isArray(properes)) {
+            return properes.map(p => p.parada);
+        }
+        // Por compatibilidad, mantenemos el parseo de string si viene en el formato antiguo
+        const parades = "[" + properes + "]";
+        return JSON.parse(parades.replace(/;/g, ",")).map(p => p.parada);
+    } catch (error) {
+        console.error('Error parseando paradas:', error);
+        return [];
+    }
 }
 
-// Función para convertir un string de hora ("HH:MM") a minutos (número)
+// Funciones de conversión de tiempo
 const timeToMinutes = timeStr => {
   if (!timeStr) return null;
   const [hours, minutes] = timeStr.split(':').map(Number);
   return hours * 60 + minutes;
 };
 
-// Función para ordenar paradas de forma ascendente basándose en el tiempo y ajustar por paso de medianoche
+// Función para ordenar resultados basados en la hora
 const sortResultsByTime = results => {
   return results.sort((a, b) => {
       const timeA = timeToMinutes(a.hora);
@@ -109,7 +108,7 @@ const sortResultsByTime = results => {
   });
 };
 
-// Función para obtener el itinerario ordenado de paradas para un tren concreto
+// Sustitución de la función getOrderedtIinerary
 function getOrderedItinerary(train) {
   const parades = [];
 
@@ -127,150 +126,147 @@ function getOrderedItinerary(train) {
   return sortResultsByTime(parades);
   
 }
-
-function verificarSecuenciaParadas(properes, itinerario, estacioActual) {
-  if (properes.length === 0 || itinerario.length === 0) return false;
-  
-  const indexActual = itinerario.findIndex(p => p.estacio === estacioActual);
-  if (indexActual === -1) return false;
-  
-  let coincidencias = 0;
-  let minCoincidenciasRequeridas = Math.min(2, properes.length);
-  
-  for (let i = 0; i < properes.length; i++) {
-    const indexItinerario = indexActual + i + 1;
-    if (indexItinerario >= itinerario.length) break;
+  function verificarSecuenciaParadas(properes, itinerario, estacioActual) {
+    if (properes.length === 0 || itinerario.length === 0) return false;
     
-    if (properes[i] === itinerario[indexItinerario].estacio) {
-      coincidencias++;
-      if (coincidencias >= minCoincidenciasRequeridas) return true;
-    } else {
-      break;
+    const indexActual = itinerario.findIndex(p => p.estacio === estacioActual);
+    if (indexActual === -1) return false;
+    
+    let coincidencias = 0;
+    let minCoincidenciasRequeridas = Math.min(2, properes.length);
+    
+    for (let i = 0; i < properes.length; i++) {
+      const indexItinerario = indexActual + i + 1;
+      if (indexItinerario >= itinerario.length) break;
+      
+      if (properes[i] === itinerario[indexItinerario].estacio) {
+        coincidencias++;
+        if (coincidencias >= minCoincidenciasRequeridas) return true;
+      } else {
+        break;
+      }
     }
-  }
-  
-  return false;
-}
-
-// Función para realizar el emparejamiento (matching) entre los trenes del API y los itinerarios cargados
-function matchTrains(itineraryList, apiTrains, horaActual) {
-  const matches = [];
-  const matchedTrains = new Set();
-  const liniesRequerides = ["R5", "R6", "S3", "S4", "S8", "S9", "L8"];
-
-  for (const api of apiTrains) {
-      const apiId = api.id;
-      const liniaApi = api.lin.substring(0, 2);
-      const direccio = api.dir;
-      const properes = parseProperesParades(api.properes_parades);
-      const estacioActual = api.estacionat_a || (properes.length > 0 ? properes[0] : "");
-
-      if (!liniesRequerides.includes(liniaApi)) {
-          continue;
-      }
-
-      if (idToTrainMap.has(apiId)) {
-          const trainData = idToTrainMap.get(apiId);
-          trainData.proximaParada = properes.length > 0 ? properes[0] : null;
-          trainData.coordinates = api.coordinates;
-          trainData.tipus_unitat = api.tipus_unitat || 'Desconegut'; // Añadido aquí
-          const trenNom = trainData.tren;
-          const train = itineraryList.find(t => t.Tren === trenNom);
-          if (!train || matchedTrains.has(trenNom)) continue;
-
-          const itinerarioOrdenado = getOrderedItinerary(train);
-          
-          let coincideEnTiempoYSecuencia = false;
-          
-          for (const parada of itinerarioOrdenado) {
-              const { estacio, hora } = parada;
-              const horaEst = parseHora(hora);
-              const diffMin = Math.abs((horaEst - horaActual) / 60000);
-
-              if (diffMin <= 10 && (estacio === estacioActual || properes.includes(estacio))) {
-                  if (estacio === estacioActual || verificarSecuenciaParadas(properes, itinerarioOrdenado, estacio)) {
-                      coincideEnTiempoYSecuencia = true;
-                      matches.push({
-                          tren: trenNom,
-                          linia: liniaApi,
-                          direccio,
-                          estacio: estacioActual,
-                          hora: hora,
-                          matched: true
-                      });
-
-                      matchedTrains.add(trenNom);
-                      break;
-                  }
-              }
-          }
-          
-          if (!coincideEnTiempoYSecuencia) {
-              idToTrainMap.delete(apiId);
-          } else {
-              continue;
-          }
-      }
-
-      let mejorMatch = null;
-      let mejorPuntuacion = 0;
-      let horaMatch = "";
-
-      for (const train of itineraryList) {
-          const liniaItinerary = train.Linia.substring(0, 2);
-          if (liniaItinerary !== liniaApi || train["A/D"] !== direccio) continue;
-          if (matchedTrains.has(train.Tren)) continue;
-
-          const itinerarioOrdenado = getOrderedItinerary(train);
-          
-          for (let i = 0; i < itinerarioOrdenado.length; i++) {
-              const { estacio, hora } = itinerarioOrdenado[i];
-              const horaEst = parseHora(hora);
-              const diffMin = Math.abs((horaEst - horaActual) / 60000);
-
-              if (diffMin <= 10 && (estacio === estacioActual || properes.includes(estacio))) {
-                  let puntuacion = 10 - diffMin;
-                  
-                  if (estacio === estacioActual) {
-                      puntuacion += 5;
-                  }
-                  
-                  if (verificarSecuenciaParadas(properes, itinerarioOrdenado, estacio)) {
-                      puntuacion += 10;
-                  }
-                  
-                  if (puntuacion > mejorPuntuacion) {
-                      mejorMatch = {
-                          tren: train.Tren,
-                          linia: liniaItinerary,
-                          direccio,
-                          estacio: estacioActual,
-                          hora: hora,
-                          matched: true
-                      };
-                      mejorPuntuacion = puntuacion;
-                      horaMatch = hora;
-                  }
-              }
-          }
-      }
-
-      if (mejorMatch) {
-          matches.push(mejorMatch);
-          matchedTrains.add(mejorMatch.tren);
-          idToTrainMap.set(apiId, {
-              tren: mejorMatch.tren,
-              coordinates: api.coordinates,
-              proximaParada: properes.length > 0 ? properes[0] : null,
-          en_hora: api.en_hora  // Afegim en_hora
-          });
-      }
+    
+    return false;
   }
 
-  return matches;
-}
+  function matchTrains(itineraryList, apiTrains, horaActual) {
+    const matches = [];
+    const matchedTrains = new Set();
+    const liniesRequerides = ["R5", "R6", "S3", "S4", "S8", "S9", "L8"];
 
-  // Función para actualizar los marcadores del mapa según los trenes activos y sus datos actualizados
+    for (const api of apiTrains) {
+        const apiId = api.id;
+        const liniaApi = api.lin.substring(0, 2);
+        const direccio = api.dir;
+        const properes = parseProperesParades(api.properes_parades);
+        const estacioActual = api.estacionat_a || (properes.length > 0 ? properes[0] : "");
+
+        if (!liniesRequerides.includes(liniaApi)) {
+            continue;
+        }
+
+        if (idToTrainMap.has(apiId)) {
+            const trainData = idToTrainMap.get(apiId);
+            trainData.proximaParada = properes.length > 0 ? properes[0] : null;
+            trainData.coordinates = api.coordinates;
+            trainData.tipus_unitat = api.tipus_unitat || 'Desconegut'; // Añadido aquí
+            const trenNom = trainData.tren;
+            const train = itineraryList.find(t => t.Tren === trenNom);
+            if (!train || matchedTrains.has(trenNom)) continue;
+
+            const itinerarioOrdenado = getOrderedItinerary(train);
+            
+            let coincideEnTiempoYSecuencia = false;
+            
+            for (const parada of itinerarioOrdenado) {
+                const { estacio, hora } = parada;
+                const horaEst = parseHora(hora);
+                const diffMin = Math.abs((horaEst - horaActual) / 60000);
+
+                if (diffMin <= 10 && (estacio === estacioActual || properes.includes(estacio))) {
+                    if (estacio === estacioActual || verificarSecuenciaParadas(properes, itinerarioOrdenado, estacio)) {
+                        coincideEnTiempoYSecuencia = true;
+                        matches.push({
+                            tren: trenNom,
+                            linia: liniaApi,
+                            direccio,
+                            estacio: estacioActual,
+                            hora: hora,
+                            matched: true
+                        });
+
+                        matchedTrains.add(trenNom);
+                        break;
+                    }
+                }
+            }
+            
+            if (!coincideEnTiempoYSecuencia) {
+                idToTrainMap.delete(apiId);
+            } else {
+                continue;
+            }
+        }
+
+        let mejorMatch = null;
+        let mejorPuntuacion = 0;
+        let horaMatch = "";
+
+        for (const train of itineraryList) {
+            const liniaItinerary = train.Linia.substring(0, 2);
+            if (liniaItinerary !== liniaApi || train["A/D"] !== direccio) continue;
+            if (matchedTrains.has(train.Tren)) continue;
+
+            const itinerarioOrdenado = getOrderedItinerary(train);
+            
+            for (let i = 0; i < itinerarioOrdenado.length; i++) {
+                const { estacio, hora } = itinerarioOrdenado[i];
+                const horaEst = parseHora(hora);
+                const diffMin = Math.abs((horaEst - horaActual) / 60000);
+
+                if (diffMin <= 10 && (estacio === estacioActual || properes.includes(estacio))) {
+                    let puntuacion = 10 - diffMin;
+                    
+                    if (estacio === estacioActual) {
+                        puntuacion += 5;
+                    }
+                    
+                    if (verificarSecuenciaParadas(properes, itinerarioOrdenado, estacio)) {
+                        puntuacion += 10;
+                    }
+                    
+                    if (puntuacion > mejorPuntuacion) {
+                        mejorMatch = {
+                            tren: train.Tren,
+                            linia: liniaItinerary,
+                            direccio,
+                            estacio: estacioActual,
+                            hora: hora,
+                            matched: true
+                        };
+                        mejorPuntuacion = puntuacion;
+                        horaMatch = hora;
+                    }
+                }
+            }
+        }
+
+        if (mejorMatch) {
+            matches.push(mejorMatch);
+            matchedTrains.add(mejorMatch.tren);
+            idToTrainMap.set(apiId, {
+                tren: mejorMatch.tren,
+                coordinates: api.coordinates,
+                proximaParada: properes.length > 0 ? properes[0] : null,
+            en_hora: api.en_hora  // Afegim en_hora
+            });
+        }
+    }
+
+    return matches;
+  }
+
   function updateMapMarkers() {
     markersLayer.clearLayers();
     let count = 0;
@@ -287,63 +283,24 @@ function matchTrains(itineraryList, apiTrains, horaActual) {
                 horaPaso = trainInfo[trainData.proximaParada] || '';
             }
 
-            // ...existing code...
-                let retardHTML = '';
-                if (horaPaso && trainInfo) {
-                  // Obtenim l'itinerari ordenat
-                  const itinerari = getOrderedItinerary(trainInfo);
-                  let retardAcumulat = 0;
-                  let paradaAnteriorHoraReal = null;
+            let retardHTML = '';
+            if (horaPaso) {
+              const [h, m] = horaPaso.split(':').map(Number);
+              const horaPrevista = new Date();
+              horaPrevista.setHours(h, m, 0, 0);
+              const ara = new Date();
 
-                  // Busquem la posició de la propera parada
-                  const idxPropera = itinerari.findIndex(p => p.estacio === trainData.proximaParada);
+              const diffMs = ara - horaPrevista;
+              const diffMin = Math.round(diffMs / 60000);
 
-                  // Recórrer totes les parades fins la propera
-                  for (let i = 0; i <= idxPropera; i++) {
-                    const parada = itinerari[i];
-                    if (!parada) continue;
-                    const [h, m] = parada.hora.split(':').map(Number);
-                    const horaPrevista = new Date();
-                    horaPrevista.setHours(h, m, 0, 0);
-
-                    // Si és la primera parada, suposem que surt puntual
-                    if (i === 0) {
-                      paradaAnteriorHoraReal = new Date(horaPrevista);
-                      continue;
-                    }
-
-                    // Simulem l'hora real d'arribada a aquesta parada
-                    // Hora real = hora real anterior + temps previst entre parades + retard acumulat
-                    const paradaAnterior = itinerari[i - 1];
-                    const [hAnt, mAnt] = paradaAnterior.hora.split(':').map(Number);
-                    const horaPrevistaAnterior = new Date();
-                    horaPrevistaAnterior.setHours(hAnt, mAnt, 0, 0);
-
-                    // Temps previst entre parades (en ms)
-                    const tempsPrevist = horaPrevista - horaPrevistaAnterior;
-
-                    // Hora real d'arribada a aquesta parada
-                    paradaAnteriorHoraReal = new Date(paradaAnteriorHoraReal.getTime() + tempsPrevist + retardAcumulat * 60000);
-
-                    // Retard a aquesta parada
-                    const retardAquestaParada = Math.round((paradaAnteriorHoraReal - horaPrevista) / 60000);
-
-                    // Si la parada és la propera, mostrem el retard acumulat
-                    if (i === idxPropera) {
-                      if (!isNaN(retardAquestaParada)) {
-                        if (retardAquestaParada > 0) {
-                          retardHTML = `<br><span class="label">Retard acumulat:</span> <span class="value" style="color:red;">+${retardAquestaParada} min</span>`;
-                        } else {
-                          retardHTML = `<br><span class="label">A temps</span>`;
-                        }
-                      }
-                    }
-
-                    // Actualitzem el retard acumulat
-                    retardAcumulat = retardAquestaParada;
-                  }
+              if (!isNaN(diffMin)) {
+                if (diffMin > 0) {
+                  retardHTML = `<br><span class="label">Retard:</span> <span class="value" style="color:red;">+${diffMin} min</span>`;
+                } else {
+                  retardHTML = `<br><span class="label">A temps</span>`;
                 }
-                // ...existing code...
+              }
+            }
 
             const proximaParada = trainData.proximaParada ? 
                 `<div class="info-row">
@@ -369,7 +326,7 @@ function matchTrains(itineraryList, apiTrains, horaActual) {
                     : 'leaflet-tooltip tooltip-vermell'
               }).bindPopup(`
                 <div class="custom-popup">
-                    <h3>🚆 <a href="#" onclick="showItinerary('${trainData.tren}'); return false;">Horari ${trainData.tren}</a></h3>
+                    <h3>🚆 <a href="#" onclick="showItinerary('${trainData.tren}'); return false;">Tren ${trainData.tren}</a></h3>
                     <div class="info-row">
                         <span class="label">Línea:</span>
                         <span class="value">${trainInfo ? trainInfo.Linia : 'N/A'}</span>
@@ -392,19 +349,17 @@ function matchTrains(itineraryList, apiTrains, horaActual) {
     document.getElementById("matchedCount").textContent = count;
   }
 
-  // Función para resetear los datos del itinerario, eliminando datos actuales y marcadores
-  function resetData() {
-    itineraryList = [];
-    idToTrainMap.clear();
-    markersLayer.clearLayers();
-    document.getElementById("matchedCount").textContent = "0";
+    function resetData() {
+      itineraryList = [];
+      idToTrainMap.clear();
+      markersLayer.clearLayers();
+      document.getElementById("matchedCount").textContent = "0";
   }
 
-  // Función para actualizar la información (descarga y procesamiento de trenes) y refrescar el mapa cada 10 segundos
   async function refresh() {
     if (itineraryList.length === 0) {
-        console.log("No hi ha itineraris carregats");
-        alert("Primer selecciona un arxiu de servei");
+        console.log("No hay itinerarios cargados");
+        alert("Primero carga un archivo JSON con itinerarios");
         return;
     }
 
@@ -454,21 +409,21 @@ function matchTrains(itineraryList, apiTrains, horaActual) {
       
       const response = await fetch(fileName);
       if (!response.ok) {
-        throw new Error(`Error al carregar arxiu: ${fileName}`);
+        throw new Error(`Error al cargar el archivo: ${fileName}`);
       };
       
       const data = await response.json();
       itineraryList = data;
-      alert(`Itinerari ${fileName} carregat correctament.`);
+      alert(`Itinerario ${fileName} cargado correctamente.`);
       refresh();
     } catch (error) {
-      alert(`Error al carregar arxiu ${fileName}: ${error.message}`);
+      alert(`Error al cargar el archivo ${fileName}: ${error.message}`);
       this.classList.remove('active');
     }
   });
 });
 
-// Función para mostrar en un modal el itinerario completo de un tren seleccionado
+  
 function showItinerary(trainName) {
   const tren = itineraryList.find(t => t.Tren === trainName);
   if (!tren) return;
