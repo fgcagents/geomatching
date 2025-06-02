@@ -270,6 +270,9 @@ function getOrderedItinerary(train) {
   function updateMapMarkers() {
     markersLayer.clearLayers();
     let count = 0;
+
+    // Mapa para almacenar el retraso inicial de cada tren
+    const initialDelayMap = new Map();
     
     idToTrainMap.forEach((trainData, id) => {
         const [lng, lat] = trainData.coordinates;
@@ -284,6 +287,8 @@ function getOrderedItinerary(train) {
             }
 
             let retardHTML = '';
+            let currentDelay = 0; // Variable para almacenar el retraso actual
+
             if (horaPaso) {
               const [h, m] = horaPaso.split(':').map(Number);
               const horaPrevista = new Date();
@@ -294,8 +299,16 @@ function getOrderedItinerary(train) {
               const diffMin = Math.round(diffMs / 60000);
 
               if (!isNaN(diffMin)) {
+                // Si es la primera vez que vemos este tren, guardamos el retraso inicial
+                if (!initialDelayMap.has(trainData.tren)) {
+                  initialDelayMap.set(trainData.tren, diffMin);
+                }
+
+                // Obtenemos el retraso inicial almacenado
+                currentDelay = initialDelayMap.get(trainData.tren);
+
                 if (diffMin > 0) {
-                  retardHTML = `<br><span class="label">Retard:</span> <span class="value" style="color:red;">+${diffMin} min</span>`;
+                  retardHTML = `<br><span class="label">Retard:</span> <span class="value" style="color:red;">+${currentDelay} min</span>`;
                 } else {
                   retardHTML = `<br><span class="label">A temps</span>`;
                 }
