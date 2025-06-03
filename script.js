@@ -15,7 +15,7 @@ let itineraryList = [];
     if (!map) {
       map = L.map("map", {
       zoomControl: false
-    }).setView([41.4, 2.1], 11);
+    }).setView([41.50835446830866,2.0292688204944476], 11);
 
       // Capa base de JAWS
       L.tileLayer('https://tile.jawg.io/43965150-ada4-4b5a-ac7a-b55f76fb8da7/{z}/{x}/{y}{r}.png?access-token=aDtkeyf8BaiAQcpFkFzvBps7HS77uBqI7R6ueHmKR7pYrYBExgKAUUPmRj358SnC', {
