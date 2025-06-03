@@ -19,7 +19,7 @@ let itineraryList = [];
 
       // Capa base de JAWS
       L.tileLayer('https://tile.jawg.io/43965150-ada4-4b5a-ac7a-b55f76fb8da7/{z}/{x}/{y}{r}.png?access-token=aDtkeyf8BaiAQcpFkFzvBps7HS77uBqI7R6ueHmKR7pYrYBExgKAUUPmRj358SnC', {
-         attribution: "<a href=\"https://www.jawg.io?utm_medium=map&utm_source=attribution\" target=\"_blank\">&copy; Jawg</a> - <a href=\"https://www.openstreetmap.org?utm_medium=map-attribution&utm_source=jawg\" target=\"_blank\">&copy; OpenStreetMap</a>&nbsp;contributors"
+         attribution: "&copy; J_E_O <a href=\"https://www.jawg.io?utm_medium=map&utm_source=attribution\" target=\"_blank\">&copy; Jawg</a> - <a href=\"https://www.openstreetmap.org?utm_medium=map-attribution&utm_source=jawg\" target=\"_blank\">&copy; OpenStreetMap</a>&nbsp;contributors"
       }).addTo(map);
 
       // Capa de vías férreas de OpenRailwayMap 
