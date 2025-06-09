@@ -319,10 +319,7 @@ function getOrderedItinerary(train) {
                 permanent: true,
                 direction: 'top',
                 offset: [4, -15],
-                /*className: trainData.en_hora === true ? 'leaflet-tooltip tooltip-verde' : 'leaflet-tooltip tooltip-vermell'*/
-                className: (trainData.en_hora === true || (retardHTML.includes('+') && parseInt(retardHTML.match(/\+(\d+)/)?.[1]) <= 2)) 
-                    ? 'leaflet-tooltip tooltip-verde' 
-                    : 'leaflet-tooltip tooltip-vermell'
+                /*className: trainData.en_hora === true ? 'leaflet-tooltip tooltip-verde' : 'leaflet-tooltip tooltip-vermell'*/                className: getTooltipColor(trainData, trainInfo, retardHTML)
               }).bindPopup(`
                 <div class="custom-popup">
                     <h3>🚆 <a href="#" onclick="showItinerary('${trainData.tren}'); return false;">Tren ${trainData.tren}</a></h3>
@@ -454,7 +451,9 @@ function getTooltipColor(trainData, trainInfo, retardHTML) {
     }
     
     // Per defecte: segons retard
-    className: getTooltipColor(trainData, trainInfo, retardHTML);
+    return (trainData.en_hora === true || (retardHTML.includes('+') && parseInt(retardHTML.match(/\+(\d+)/)?.[1]) <= 2)) 
+        ? 'leaflet-tooltip tooltip-verde' 
+        : 'leaflet-tooltip tooltip-vermell';
 }
 
 // Funció per assignar color personalitzat a un tren
