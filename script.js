@@ -2,6 +2,8 @@ let itineraryList = [];
   let idToTrainMap = new Map();
   let map;
   let markersLayer = L.layerGroup();
+  // Mapa per guardar colors personalitzats per nom de tren
+let trainColorMap = new Map();
 
   const trainIcon = L.divIcon({
     html: `<div style="font-size: 24px;">🚆</div>`,
@@ -442,6 +444,68 @@ function showItinerary(trainName) {
   document.getElementById("itineraryModal").style.display = "block";
 }
 
-  // Inicializar el mapa al cargar
-  initMap();
-  setInterval(refresh, 10000);
+ 
+// Funció per determinar el color del tooltip
+function getTooltipColor(trainData, trainInfo, retardHTML) {
+    const selector = document.getElementById('trainColorSelector').value;
+    
+    if (selector === 'custom') {
+        return trainColorMap.get(trainData.tren) || 'leaflet-tooltip';
+    }
+    
+    // Per defecte: segons retard
+    className: getTooltipColor(trainData, trainInfo, retardHTML);
+}
+
+// Funció per assignar color personalitzat a un tren
+function assignTrainColor() {
+    const trainName = document.getElementById('trainNameInput').value.trim();
+    const color = document.getElementById('colorSelect').value;
+    
+    if (!trainName) {
+        alert('Introdueix un nom de tren');
+        return;
+    }
+    
+    trainColorMap.set(trainName, color);
+    document.getElementById('trainNameInput').value = '';
+    
+    // Actualitzar marcadors si hi ha trens carregats
+    if (idToTrainMap.size > 0) {
+        updateMapMarkers();
+    }
+    
+    alert(`Color ${color.replace('tooltip-', '')} assignat al tren ${trainName}`);
+}
+
+// Funció per esborrar tots els colors personalitzats
+function clearTrainColors() {
+    trainColorMap.clear();
+    if (idToTrainMap.size > 0) {
+        updateMapMarkers();
+    }
+    alert('Colors personalitzats esborrats');
+}
+
+// Event listener per al selector de color
+document.addEventListener('DOMContentLoaded', function() {
+    const selector = document.getElementById('trainColorSelector');
+    const customControls = document.getElementById('customColorControls');
+    
+    selector.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            customControls.style.display = 'block';
+        } else {
+            customControls.style.display = 'none';
+        }
+        
+        // Actualitzar marcadors
+        if (idToTrainMap.size > 0) {
+            updateMapMarkers();
+        }
+    });
+});
+
+// Inicializar el mapa al cargar
+initMap();
+setInterval(refresh, 10000);
