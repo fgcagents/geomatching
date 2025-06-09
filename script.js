@@ -505,6 +505,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Control del selector de colores
+document.addEventListener('DOMContentLoaded', function() {
+    const colorSelectorToggle = document.getElementById('colorSelectorToggle');
+    const colorSelectorContent = document.getElementById('colorSelectorContent');
+    
+    // Toggle del panel de colores
+    colorSelectorToggle.addEventListener('click', function() {
+        colorSelectorContent.classList.toggle('active');
+        colorSelectorToggle.textContent = colorSelectorContent.classList.contains('active') ? '−' : '+';
+    });
+    
+    // Cerrar el panel si se hace clic fuera
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.color-selector')) {
+            colorSelectorContent.classList.remove('active');
+            colorSelectorToggle.textContent = '+';
+        }
+    });
+});
+
 // Inicializar el mapa al cargar
 initMap();
 setInterval(refresh, 10000);
