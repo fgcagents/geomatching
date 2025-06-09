@@ -20,6 +20,27 @@
       <button class="controls__file-button" data-file="400_500.json">400/500</button>
       <button class="controls__button" style="background:#063970;" onclick="window.open('https://fgcagents.github.io/proves/', '_blank')">Itineraris ▶</button>
     </div>
+<label for="trainColorSelector">Color per nom de tren:</label>
+    <select id="trainColorSelector" class="color-selector">
+        <option value="default">Per defecte (segons retard)</option>
+        <option value="custom">Colors personalitzats</option>
+    </select>
+    
+    <!-- Selector de colors personalitzats (ocultat inicialment) -->
+    <div id="customColorControls" style="display: none;">
+        <input type="text" id="trainNameInput" placeholder="Nom del tren (ex: 4001)" style="margin: 5px;">
+        <select id="colorSelect" style="margin: 5px;">
+            <option value="tooltip-vermell">Vermell</option>
+            <option value="tooltip-verd">Verd</option>
+            <option value="tooltip-blau">Blau</option>
+            <option value="tooltip-groc">Groc</option>
+            <option value="tooltip-taronja">Taronja</option>
+            <option value="tooltip-rosa">Rosa</option>
+            <option value="tooltip-cian">Cian</option>
+        </select>
+        <button onclick="assignTrainColor()">Assignar Color</button>
+        <button onclick="clearTrainColors()">Esborrar Colors</button>
+    </div>
   </div>
 
   <div id="map"></div>
