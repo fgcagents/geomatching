@@ -328,3 +328,55 @@ body {
         display: none;
       }
 }
+
+/* Colors per als tooltips */
+.tooltip-vermell {
+    background-color: #ff4444 !important;
+    color: white !important;
+    border: 1px solid #cc0000 !important;
+}
+
+.tooltip-verd {
+    background-color: #44ff44 !important;
+    color: black !important;
+    border: 1px solid #00cc00 !important;
+}
+
+.tooltip-blau {
+    background-color: #4444ff !important;
+    color: white !important;
+    border: 1px solid #0000cc !important;
+}
+
+.tooltip-groc {
+    background-color: #ffff44 !important;
+    color: black !important;
+    border: 1px solid #cccc00 !important;
+}
+
+.tooltip-taronja {
+    background-color: #ff8844 !important;
+    color: white !important;
+    border: 1px solid #cc4400 !important;
+}
+
+.tooltip-rosa {
+    background-color: #ff44ff !important;
+    color: white !important;
+    border: 1px solid #cc00cc !important;
+}
+
+.tooltip-cian {
+    background-color: #44ffff !important;
+    color: black !important;
+    border: 1px solid #00cccc !important;
+}
+
+/* Estil per al desplegable */
+.color-selector {
+    margin: 10px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+}
