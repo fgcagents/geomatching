@@ -22,9 +22,6 @@ function loadTrainColors() {
   }
 }
 
-// Carregar els colors al iniciar
-loadTrainColors();
-
 const trainIcon = L.divIcon({
     html: `<div style="font-size: 24px;">🚆</div>`,
     className: 'train-marker',
@@ -519,8 +516,17 @@ function clearTrainColors() {
 
 // Event listener per al selector de color
 document.addEventListener('DOMContentLoaded', function() {
+    // Carregar els colors guardats
+    loadTrainColors();
+    
     const selector = document.getElementById('trainColorSelector');
     const customControls = document.getElementById('customColorControls');
+    
+    // Si hi ha colors personalitzats guardats, activar el mode personalitzat
+    if (trainColorMap.size > 0) {
+        selector.value = 'custom';
+        customControls.style.display = 'block';
+    }
     
     selector.addEventListener('change', function() {
         if (this.value === 'custom') {
