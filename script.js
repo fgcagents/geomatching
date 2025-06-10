@@ -231,7 +231,7 @@ function getOrderedItinerary(train) {
                         puntuacion += 5;
                     }
                     
-                    if (verificarSecuenciaParadas(properes, itinerarioOrdenado, estacio)) {
+                    if (verificarSecuenciaParades(properes, itinerarioOrdenado, estacio)) {
                         puntuacion += 10;
                     }
                     
@@ -460,39 +460,76 @@ function getTooltipColor(trainData, trainInfo, retardHTML) {
 // Funció per assignar color personalitzat a un tren
 function assignTrainColor() {
     const trainName = document.getElementById('trainNameInput').value.trim();
+    const colorSelect = document.getElementById('colorSelect');
     const colorRef = document.getElementById('colorRefInput').value.trim();
-    const color = document.getElementById('colorSelect').value;
     
     if (!trainName) {
-        alert('Introdueix un nom de tren');
+        alert('Si us plau, introdueix el nom del tren');
         return;
     }
     
-    if (!colorRef) {
-        alert('Introdueix una referència per al color');
-        return;
-    }
+    trainColorMap.set(trainName, {
+        color: colorSelect.value,
+        reference: colorRef
+    });
     
-    trainColorMap.set(trainName, { color, reference: colorRef });
-    document.getElementById('trainNameInput').value = '';
-    document.getElementById('colorRefInput').value = '';
+    // Guardar los cambios en el servidor
+    saveTrainColors();
     
-    // Actualitzar marcadors si hi ha trens carregats
     if (idToTrainMap.size > 0) {
         updateMapMarkers();
     }
     
-    alert(`Color ${color.replace('tooltip-', '')} assignat al tren ${trainName} (${colorRef})`);
+    // Limpiar los campos
+    document.getElementById('trainNameInput').value = '';
+    document.getElementById('colorRefInput').value = '';
 }
 
 // Funció per esborrar tots els colors personalitzats
 function clearTrainColors() {
     trainColorMap.clear();
+    // Guardar los cambios en el servidor (mapa vacío)
+    saveTrainColors();
     if (idToTrainMap.size > 0) {
         updateMapMarkers();
     }
     alert('Colors personalitzats esborrats');
 }
+
+// Función para guardar los colores en localStorage
+function saveTrainColors() {
+    const colorsData = {};
+    trainColorMap.forEach((value, key) => {
+        colorsData[key] = value;
+    });
+    try {
+        localStorage.setItem('trainColors', JSON.stringify(colorsData));
+    } catch (error) {
+        console.error('Error al guardar los colores:', error);
+    }
+}
+
+// Función para cargar los colores desde localStorage
+function loadTrainColors() {
+    try {
+        const colorsData = JSON.parse(localStorage.getItem('trainColors') || '{}');
+        trainColorMap.clear();
+        Object.entries(colorsData).forEach(([trainName, colorData]) => {
+            trainColorMap.set(trainName, colorData);
+        });
+        if (idToTrainMap.size > 0) {
+            updateMapMarkers();
+        }
+    } catch (error) {
+        console.error('Error al cargar los colores:', error);
+    }
+}
+
+// Cargar los colores al iniciar la aplicación
+document.addEventListener('DOMContentLoaded', function() {
+    // ...existing code...
+    loadTrainColors(); // Cargar los colores guardados
+});
 
 // Event listener per al selector de color
 document.addEventListener('DOMContentLoaded', function() {
