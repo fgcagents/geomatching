@@ -1,11 +1,31 @@
 let itineraryList = [];
-  let idToTrainMap = new Map();
-  let map;
-  let markersLayer = L.layerGroup();
-  // Mapa per guardar colors personalitzats per nom de tren
+let idToTrainMap = new Map();
+let map;
+let markersLayer = L.layerGroup();
+// Mapa per guardar colors personalitzats per nom de tren
 let trainColorMap = new Map();
 
-  const trainIcon = L.divIcon({
+// Funcions per gestionar la persistència dels colors
+function saveTrainColors() {
+  const colors = {};
+  trainColorMap.forEach((value, key) => {
+    colors[key] = value;
+  });
+  localStorage.setItem('trainColors', JSON.stringify(colors));
+}
+
+function loadTrainColors() {
+  const colors = localStorage.getItem('trainColors');
+  if (colors) {
+    const parsed = JSON.parse(colors);
+    trainColorMap = new Map(Object.entries(parsed));
+  }
+}
+
+// Carregar els colors al iniciar
+loadTrainColors();
+
+const trainIcon = L.divIcon({
     html: `<div style="font-size: 24px;">🚆</div>`,
     className: 'train-marker',
     iconSize: [24, 24],
@@ -474,6 +494,8 @@ function assignTrainColor() {
     }
     
     trainColorMap.set(trainName, { color, reference: colorRef });
+    saveTrainColors(); // Guardar colors al localStorage
+    
     document.getElementById('trainNameInput').value = '';
     document.getElementById('colorRefInput').value = '';
     
@@ -488,6 +510,7 @@ function assignTrainColor() {
 // Funció per esborrar tots els colors personalitzats
 function clearTrainColors() {
     trainColorMap.clear();
+    localStorage.removeItem('trainColors'); // Esborrar colors del localStorage
     if (idToTrainMap.size > 0) {
         updateMapMarkers();
     }
