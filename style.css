@@ -420,6 +420,8 @@ body {
     display: none;
 }
 
+
+
 .color-selector-content.active {
     display: block;
 }
@@ -506,3 +508,12 @@ body {
 .tooltip-groc { background-color: #ffcc00 !important; color: black !important; }
 .tooltip-blau { background-color: #0071e3 !important; color: white !important; }
 .tooltip-lila { background-color: #5856d6 !important; color: white !important; }
+
+#colorRefInput {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}

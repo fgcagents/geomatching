@@ -447,7 +447,8 @@ function getTooltipColor(trainData, trainInfo, retardHTML) {
     const selector = document.getElementById('trainColorSelector').value;
     
     if (selector === 'custom') {
-        return trainColorMap.get(trainData.tren) || 'leaflet-tooltip';
+        const colorData = trainColorMap.get(trainData.tren);
+        return colorData ? colorData.color : 'leaflet-tooltip';
     }
     
     // Per defecte: segons retard
@@ -459,6 +460,7 @@ function getTooltipColor(trainData, trainInfo, retardHTML) {
 // Funció per assignar color personalitzat a un tren
 function assignTrainColor() {
     const trainName = document.getElementById('trainNameInput').value.trim();
+    const colorRef = document.getElementById('colorRefInput').value.trim();
     const color = document.getElementById('colorSelect').value;
     
     if (!trainName) {
@@ -466,15 +468,21 @@ function assignTrainColor() {
         return;
     }
     
-    trainColorMap.set(trainName, color);
+    if (!colorRef) {
+        alert('Introdueix una referència per al color');
+        return;
+    }
+    
+    trainColorMap.set(trainName, { color, reference: colorRef });
     document.getElementById('trainNameInput').value = '';
+    document.getElementById('colorRefInput').value = '';
     
     // Actualitzar marcadors si hi ha trens carregats
     if (idToTrainMap.size > 0) {
         updateMapMarkers();
     }
     
-    alert(`Color ${color.replace('tooltip-', '')} assignat al tren ${trainName}`);
+    alert(`Color ${color.replace('tooltip-', '')} assignat al tren ${trainName} (${colorRef})`);
 }
 
 // Funció per esborrar tots els colors personalitzats
@@ -524,6 +532,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+
 
 // Inicializar el mapa al cargar
 initMap();

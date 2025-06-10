@@ -27,14 +27,14 @@
     <button class="color-selector-toggle" id="colorSelectorToggle">+</button>
     <div class="color-selector-content" id="colorSelectorContent">
       <div class="color-mode-selector">
+        <label for="trainColorSelector">Mode de colors:</label>
         <select id="trainColorSelector">
           <option value="default">Per defecte (segons retard)</option>
           <option value="custom">Colors personalitzats</option>
         </select>
       </div>
-      
-      <div id="customColorControls" style="display: none;">
-        <input type="text" id="trainNameInput" placeholder="Nom del tren (ex: 4001)">
+        <div id="customColorControls" style="display: none;">        <input type="text" id="trainNameInput" placeholder="Nom del tren (ex: 4001)">
+        <input type="text" id="colorRefInput" placeholder="Referència (ex: Línia R5)">
         <select id="colorSelect">
           <option value="tooltip-vermell">Vermell</option>
           <option value="tooltip-verd">Verd</option>
