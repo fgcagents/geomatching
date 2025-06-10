@@ -327,11 +327,11 @@ function getOrderedItinerary(train) {
                         <span class="label">Línea:</span>
                         <span class="value">${trainInfo ? trainInfo.Linia : 'N/A'}</span>
                     </div>
-                    ${proximaParada}
-                    <div class="info-row">
+                    ${proximaParada}                    <div class="info-row">
                         <span class="label">Tipus Unitat:</span>
                         <span class="value">${tipusUnitat}</span>
                     </div>
+                    ${getColorInfo(trainData.tren)}
                 </div>
             `, {
                 offset: L.point(4, 0)  // Desplaza el popup 20 píxeles hacia arriba
@@ -538,3 +538,18 @@ document.addEventListener('DOMContentLoaded', function() {
 // Inicializar el mapa al cargar
 initMap();
 setInterval(refresh, 10000);
+
+// Función para generar el HTML del color asignado
+function getColorInfo(trainName) {
+    const colorData = trainColorMap.get(trainName);
+    if (!colorData) return '';
+    
+    return `
+    <div class="info-row">
+        <span class="label">Color assignat:</span>
+        <div class="color-info">
+            <span class="color-ball ${colorData.color}"></span>
+            <span class="value">${colorData.reference}</span>
+        </div>
+    </div>`;
+}

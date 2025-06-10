@@ -517,3 +517,25 @@ body {
     border-radius: 6px;
     font-size: 14px;
 }
+
+/* Estilos para el color en el popup */
+.color-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.color-ball {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Colores para las bolas */
+.tooltip-vermell.color-ball { background-color: #ff3b30; }
+.tooltip-verd.color-ball { background-color: #34c759; }
+.tooltip-blau.color-ball { background-color: #0071e3; }
+.tooltip-groc.color-ball { background-color: #ffcc00; }
+.tooltip-lila.color-ball { background-color: #5856d6; }
