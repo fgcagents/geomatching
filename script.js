@@ -582,3 +582,41 @@ function getColorInfo(trainName) {
         </div>
     </div>`;
 }
+
+// Función para exportar los colores personalizados a un archivo JSON
+function exportTrainColors() {
+  const colors = {};
+  trainColorMap.forEach((value, key) => {
+    colors[key] = value;
+  });
+  const blob = new Blob([JSON.stringify(colors, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'colores_trenes.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Función para importar colores personalizados desde un archivo JSON
+function importTrainColors(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      trainColorMap = new Map(Object.entries(imported));
+      saveTrainColors();
+      if (idToTrainMap.size > 0) {
+        updateMapMarkers();
+      }
+      alert('Colors importats correctament!');
+    } catch (err) {
+      alert('Error al importar el fitxer de colors.');
+    }
+  };
+  reader.readAsText(file);
+}

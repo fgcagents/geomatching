@@ -46,6 +46,11 @@
           <button class="assign" onclick="assignTrainColor()">Assignar</button>
           <button class="clear" onclick="clearTrainColors()">Esborrar tots</button>
         </div>
+        <div class="color-actions">
+          <button class="assign" onclick="exportTrainColors()">Exportar colors</button>
+          <input type="file" id="importColorsInput" accept="application/json" style="display:none" onchange="importTrainColors(event)">
+          <button class="assign" onclick="document.getElementById('importColorsInput').click()">Importar colors</button>
+        </div>
       </div>
     </div>
   </div>
