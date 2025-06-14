@@ -601,22 +601,21 @@ function exportTrainColors() {
 }
 
 // Función para importar colores personalizados desde un archivo JSON
-function importTrainColors(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const imported = JSON.parse(e.target.result);
+function importTrainColors() {
+  fetch('color_trens.json')
+    .then(response => {
+      if (!response.ok) throw new Error('No s\'ha pogut carregar color_trens.json');
+      return response.json();
+    })
+    .then(imported => {
       trainColorMap = new Map(Object.entries(imported));
       saveTrainColors();
       if (idToTrainMap.size > 0) {
         updateMapMarkers();
       }
       alert('Colors importats correctament!');
-    } catch (err) {
+    })
+    .catch(() => {
       alert('Error al importar el fitxer de colors.');
-    }
-  };
-  reader.readAsText(file);
+    });
 }
