@@ -1,0 +1,10 @@
+{
+  "M114": {
+    "color": "tooltip-blau",
+    "reference": "BLAU"
+  },
+  "V125": {
+    "color": "tooltip-groc",
+    "reference": "GROC"
+  }
+}
