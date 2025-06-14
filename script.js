@@ -602,7 +602,7 @@ function exportTrainColors() {
 
 // Función para importar colores personalizados desde un archivo JSON
 function importTrainColors() {
-  fetch('color_trens.json')
+  fetch('./color_trens.json')
     .then(response => {
       if (!response.ok) throw new Error('No s\'ha pogut carregar color_trens.json');
       return response.json();
@@ -614,8 +614,8 @@ function importTrainColors() {
         updateMapMarkers();
       }
       alert('Colors importats correctament!');
-    })
-    .catch(() => {
-      alert('Error al importar el fitxer de colors.');
+    })    .catch((error) => {
+      console.error('Error al importar colors:', error);
+      alert('Error al importar el fitxer de colors. Comprova que el fitxer color_trens.json existeix al repositori.');
     });
 }
