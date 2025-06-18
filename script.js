@@ -343,10 +343,13 @@ function getOrderedItinerary(train) {
                     <div class="info-row">
                         <span class="label">Línea:</span>
                         <span class="value">${trainInfo ? trainInfo.Linia : 'N/A'}</span>
-                    </div>
-                    ${proximaParada}                    <div class="info-row">
+                    </div>                    ${proximaParada}                    <div class="info-row">
                         <span class="label">Tipus Unitat:</span>
                         <span class="value">${tipusUnitat}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Torn:</span>
+                        <span class="value">${trainInfo ? trainInfo.Torn || '-' : '-'}</span>
                     </div>
                     ${getColorInfo(trainData.tren)}
                 </div>
@@ -448,10 +451,9 @@ function showItinerary(trainName) {
 
   // Utilizamos getOrderedItinerary para obtener las paradas ordenadas correctamente
   const itinerarioOrdenado = getOrderedItinerary(tren);
-    // Añadimos cada parada a la tabla
+  // Añadimos cada parada a la tabla
   for (const parada of itinerarioOrdenado) {
-    const tornValue = tren.Torn || '-'; // Si no hay valor de Torn, mostramos un guión
-    const row = `<tr><td>${parada.estacio}</td><td>${parada.hora}</td><td>${tornValue}</td></tr>`;
+    const row = `<tr><td>${parada.estacio}</td><td>${parada.hora}</td></tr>`;
     tableBody.innerHTML += row;
   }
 
