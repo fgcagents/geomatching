@@ -448,10 +448,10 @@ function showItinerary(trainName) {
 
   // Utilizamos getOrderedItinerary para obtener las paradas ordenadas correctamente
   const itinerarioOrdenado = getOrderedItinerary(tren);
-  
-  // Añadimos cada parada a la tabla
+    // Añadimos cada parada a la tabla
   for (const parada of itinerarioOrdenado) {
-    const row = `<tr><td>${parada.estacio}</td><td>${parada.hora}</td></tr>`;
+    const tornValue = tren.Torn || '-'; // Si no hay valor de Torn, mostramos un guión
+    const row = `<tr><td>${parada.estacio}</td><td>${parada.hora}</td><td>${tornValue}</td></tr>`;
     tableBody.innerHTML += row;
   }
 
