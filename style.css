@@ -256,6 +256,19 @@ body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
       border-radius: 12px;
+      display: none;
+      position: fixed;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 300px;
+      max-width: 600px;
+      max-height: 80%;
+      overflow: auto;
+      background: white;
+      padding: 20px;
+      z-index: 10000;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
     #itineraryModal h2 {
@@ -266,10 +279,8 @@ body {
     }
 
     #itineraryTable {
-        width: auto;
-        margin: 20px auto;
+        width: 100%;
         border-collapse: collapse;
-        border: none;
     }
 
     #itineraryTable th, #itineraryTable td {
@@ -306,6 +317,7 @@ body {
       cursor: pointer;
       letter-spacing: 1px;
       width: auto;
+      float: right;
     }
 
     #itineraryModal button:hover {
@@ -502,40 +514,38 @@ body {
     opacity: 0.9;
 }
 
-/* Estilos para los colores predefinidos */
-.tooltip-verde { background-color: #34c759 !important; color: white !important; }
-.tooltip-vermell { background-color: #ff3b30 !important; color: white !important; }
-.tooltip-groc { background-color: #ffcc00 !important; color: black !important; }
-.tooltip-blau { background-color: #0071e3 !important; color: white !important; }
-.tooltip-lila { background-color: #5856d6 !important; color: white !important; }
+/* Estilos del botón de itinerarios */
+    .controls__button[onclick*="proves"] {
+        background: #063970;
+    }
 
-#colorRefInput {
-    width: 100%;
-    padding: 8px;
-    margin: 5px 0;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 14px;
-}
+    /* Controles de color personalizados */
+    #customColorControls {
+        display: none;
+    }
 
-/* Estilos para el color en el popup */
-.color-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 5px;
-}
+    /* Modal de itinerario */
+    #itineraryModal {
+        display: none;
+        position: fixed;
+        top: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        min-width: 300px;
+        max-width: 600px;
+        max-height: 80%;
+        overflow: auto;
+        background: white;
+        padding: 20px;
+        z-index: 10000;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
 
-.color-ball {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    display: inline-block;
-}
+    #itineraryModal button {
+        float: right;
+    }
 
-/* Colores para las bolas */
-.tooltip-vermell.color-ball { background-color: #ff3b30; }
-.tooltip-verd.color-ball { background-color: #34c759; }
-.tooltip-blau.color-ball { background-color: #0071e3; }
-.tooltip-groc.color-ball { background-color: #ffcc00; }
-.tooltip-lila.color-ball { background-color: #5856d6; }
+    #itineraryTable {
+        width: 100%;
+        border-collapse: collapse;
+    }

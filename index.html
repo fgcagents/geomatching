@@ -18,7 +18,7 @@
       <button class="controls__file-button" data-file="000_100.json">000/100</button>
       <button class="controls__file-button" data-file="200_300.json">200/300</button>
       <button class="controls__file-button" data-file="400_500.json">400/500</button>
-      <button class="controls__button" style="background:#063970;" onclick="window.open('https://fgcagents.github.io/proves/', '_blank')">Itineraris ▶</button>
+      <button class="controls__button" onclick="window.open('https://fgcagents.github.io/proves/', '_blank')">Itineraris ▶</button>
     </div>
     </div>
   </div>
@@ -33,7 +33,7 @@
           <option value="custom">Colors personalitzats</option>
         </select>
       </div>
-        <div id="customColorControls" style="display: none;">        <input type="text" id="trainNameInput" placeholder="Nom del tren (ex: 4001)">
+        <div id="customColorControls">        <input type="text" id="trainNameInput" placeholder="Nom del tren (ex: 4001)">
         <input type="text" id="colorRefInput" placeholder="Referència (ex: Línia R5)">
         <select id="colorSelect">
           <option value="tooltip-vermell">Vermell</option>
@@ -55,10 +55,10 @@
   </div>
 
   <div id="map"></div>
-
-  <div id="itineraryModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); min-width:300px; max-width:600px; max-height:80%; overflow:auto; background:white; padding:20px; z-index:10000; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-    <button onclick="document.getElementById('itineraryModal').style.display='none'" style="float:right;">Tancar</button>
-    <h2>Itinerari <span id="modalTrainName"></span></h2>    <table id="itineraryTable" style="width:100%; border-collapse: collapse;">
+  <div id="itineraryModal">
+    <button onclick="document.getElementById('itineraryModal').style.display='none'">Tancar</button>
+    <h2>Itinerari <span id="modalTrainName"></span></h2>
+    <table id="itineraryTable">
       <thead>
         <tr><th>Estació</th><th>Hora</th></tr>
       </thead>

@@ -332,7 +332,7 @@ function getOrderedItinerary(train) {
     
             const marker = L.marker([lat, lng], {
                 icon: trainIcon
-            }).bindTooltip(`${flecha} ${trainData.tren} (${trainInfo ? trainInfo.Torn || '-' : '-'})`, {
+            }).bindTooltip(`${flecha} ${trainData.tren} <span class="torn-label">(${trainInfo ? trainInfo.Torn || '-' : '-'})</span>`, {
                 permanent: true,
                 direction: 'top',
                 offset: [4, -15],
