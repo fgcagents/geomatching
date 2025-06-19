@@ -1,12 +1,12 @@
 [
   {
-    "tren": "M076",
+    "tren": "O378",
     "color": "tooltip-vermell",
     "reference": "jol"
   },
   {
-    "tren": "N551",
-    "color": "tooltip-blau",
+    "tren": "P454",
+    "color": "tooltip-groc",
     "reference": "Blau"
   }
 ]
