@@ -1,14 +1,12 @@
-{
-  "P426": {
-    "color": "tooltip-groc",
-    "reference": "GROC"
+[
+  {
+    "tren": "M076",
+    "color": "tooltip-vermell",
+    "reference": "jol"
   },
-  "N428": {
-    "color": "tooltip-groc",
-    "reference": "GROC"
-  },
-  "O316": {
-    "color": "tooltip-groc",
-    "reference": "GROC"
+  {
+    "tren": "N551",
+    "color": "tooltip-blau",
+    "reference": "Blau"
   }
-}
+]
