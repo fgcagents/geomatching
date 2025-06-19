@@ -382,6 +382,8 @@ async function loadTrainColorsFromFile() {
     imported.forEach(item => {
       trainColorMap.set(item.tren, { color: item.color, reference: item.reference });
     });
+    // Esborrar localStorage abans de guardar els nous colors
+    localStorage.removeItem('trainColors');
     saveTrainColors();
   } catch (error) {
     console.error('Error carregant colors:', error);
@@ -536,10 +538,13 @@ function clearTrainColors() {
 }
 
 // Event listener per al selector de color
-document.addEventListener('DOMContentLoaded', function() {
-    // Carregar els colors guardats
-    loadTrainColors();
-    
+document.addEventListener('DOMContentLoaded', async function() {
+    // Primer intentar carregar colors des de fitxer
+    await loadTrainColorsFromFile();
+    // Si no hi ha colors, carregar del localStorage (per compatibilitat)
+    if (trainColorMap.size === 0) {
+      loadTrainColors();
+    }
     const selector = document.getElementById('trainColorSelector');
     const customControls = document.getElementById('customColorControls');
     
