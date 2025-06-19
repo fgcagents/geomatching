@@ -157,7 +157,7 @@ function getOrderedItinerary(train) {
       
       if (properes[i] === itinerario[indexItinerario].estacio) {
         coincidencias++;
-        if (coincidencias >= minCoincidenciasRequeridas) return true;
+        if (coincidencias >= minCoincidenciasRequerides) return true;
       } else {
         break;
       }
@@ -569,6 +569,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Inicializar el mapa al cargar
 initMap();
 setInterval(refresh, 10000);
+setInterval(refreshColors, 20000); // Refresca colors cada 20 segons
 
 // Función para generar el HTML del color asignado
 function getColorInfo(trainName) {
@@ -623,5 +624,28 @@ function importTrainColors() {
     .catch((error) => {
       console.error('Error al importar colors:', error);
       alert('Error al importar el fitxer de colors. Comprova que el fitxer color_trens.json existeix al repositori.');
+    });
+}
+
+// Funció per refrescar els colors des de color_trens.json
+function refreshColors() {
+  fetch('./color_trens.json')
+    .then(response => {
+      if (!response.ok) throw new Error('No s\'ha pogut carregar color_trens.json');
+      return response.json();
+    })
+    .then(imported => {
+      trainColorMap = new Map();
+      imported.forEach(item => {
+        trainColorMap.set(item.tren, { color: item.color, reference: item.reference });
+      });
+      saveTrainColors();
+      if (typeof updateMapMarkers === 'function' && idToTrainMap && idToTrainMap.size > 0) {
+        updateMapMarkers();
+      }
+      // Opcional: console.log('Colors refrescats correctament!');
+    })
+    .catch((error) => {
+      console.error('Error al refrescar colors:', error);
     });
 }
