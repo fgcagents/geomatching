@@ -380,6 +380,23 @@ function getOrderedItinerary(train) {
     }
 
     try {
+        // Refrescar colors abans de tot
+        await fetch('./color_trens.json')
+          .then(response => {
+            if (!response.ok) throw new Error('No s\'ha pogut carregar color_trens.json');
+            return response.json();
+          })
+          .then(imported => {
+            trainColorMap = new Map();
+            imported.forEach(item => {
+              trainColorMap.set(item.tren, { color: item.color, reference: item.reference });
+            });
+            saveTrainColors();
+          })
+          .catch((error) => {
+            console.error('Error refrescant colors dins de refresh:', error);
+          });
+
         const horaActual = getHoraActual();
         const apiTrains = await fetchAllTrains();
         console.log("Trenes obtenidos de la API:", apiTrains.length);
@@ -420,7 +437,7 @@ function getOrderedItinerary(train) {
       // Activar el botón seleccionado
       this.classList.add('active');
       
-      // Reiniciar los datos antes de cargar el nuevo archivo
+      // Reiniciar los datos abans de carregar el nou arxiu
       resetData();
       
       const response = await fetch(fileName);
