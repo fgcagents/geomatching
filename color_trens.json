@@ -1,22 +1,22 @@
 [
   {
     "tren": "O378",
-    "color": "tooltip-vermell",
+    "color": "tooltip-verd",
     "reference": "jol"
   },
   {
     "tren": "P454",
-    "color": "tooltip-groc",
+    "color": "tooltip-blau",
     "reference": "Blau"
   },
   {
     "tren": "P458",
-    "color": "tooltip-vermell",
+    "color": "tooltip-verd",
     "reference": "FF"
   },
   {
     "tren": "N458",
-    "color": "tooltip-vermell",
+    "color": "tooltip-verd",
     "reference": "gg"
   }
 ]
