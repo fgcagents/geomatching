@@ -372,6 +372,22 @@ function getOrderedItinerary(train) {
       document.getElementById("matchedCount").textContent = "0";
   }
 
+  // Funció asíncrona per carregar colors des de color_trens.json
+async function loadTrainColorsFromFile() {
+  try {
+    const response = await fetch('./color_trens.json');
+    if (!response.ok) throw new Error('No s\'ha pogut carregar color_trens.json');
+    const imported = await response.json();
+    trainColorMap = new Map();
+    imported.forEach(item => {
+      trainColorMap.set(item.tren, { color: item.color, reference: item.reference });
+    });
+    saveTrainColors();
+  } catch (error) {
+    console.error('Error carregant colors:', error);
+  }
+}
+
   async function refresh() {
     if (itineraryList.length === 0) {
         console.log("No hay itinerarios cargados");
@@ -380,22 +396,8 @@ function getOrderedItinerary(train) {
     }
 
     try {
-        // Refrescar colors abans de tot
-        await fetch('./color_trens.json')
-          .then(response => {
-            if (!response.ok) throw new Error('No s\'ha pogut carregar color_trens.json');
-            return response.json();
-          })
-          .then(imported => {
-            trainColorMap = new Map();
-            imported.forEach(item => {
-              trainColorMap.set(item.tren, { color: item.color, reference: item.reference });
-            });
-            saveTrainColors();
-          })
-          .catch((error) => {
-            console.error('Error refrescant colors dins de refresh:', error);
-          });
+        // Esperar a que els colors estiguin carregats
+        await loadTrainColorsFromFile();
 
         const horaActual = getHoraActual();
         const apiTrains = await fetchAllTrains();
