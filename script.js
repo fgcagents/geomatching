@@ -610,13 +610,17 @@ function importTrainColors() {
       return response.json();
     })
     .then(imported => {
-      trainColorMap = new Map(Object.entries(imported));
+      trainColorMap = new Map();
+      imported.forEach(item => {
+        trainColorMap.set(item.tren, { color: item.color, reference: item.reference });
+      });
       saveTrainColors();
       if (idToTrainMap.size > 0) {
         updateMapMarkers();
       }
       alert('Colors importats correctament!');
-    })    .catch((error) => {
+    })
+    .catch((error) => {
       console.error('Error al importar colors:', error);
       alert('Error al importar el fitxer de colors. Comprova que el fitxer color_trens.json existeix al repositori.');
     });
