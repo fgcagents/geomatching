@@ -157,7 +157,7 @@ function getOrderedItinerary(train) {
       
       if (properes[i] === itinerario[indexItinerario].estacio) {
         coincidencias++;
-        if (coincidencias >= minCoincidenciasRequerides) return true;
+        if (coincidencias >= minCoincidenciasRequeridas) return true;
       } else {
         break;
       }
