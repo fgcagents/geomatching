@@ -330,9 +330,19 @@ function getOrderedItinerary(train) {
             // Añadir el campo tipus_unitat al popup
             const tipusUnitat = trainData.tipus_unitat || 'Desconegut';
     
+            // Construir el texto del tooltip
+            let tooltipText = `${flecha} ${trainData.tren}`;
+            if (retardHTML && retardHTML.includes('Retard')) {
+                // Extraer solo el texto de minutos de retraso
+                const match = retardHTML.match(/\+(\d+) min/);
+                if (match) {
+                    tooltipText += ` <span style=\"color:red;\">(+${match[1]} min)</span>`;
+                }
+            }
+    
             const marker = L.marker([lat, lng], {
                 icon: trainIcon
-            }).bindTooltip(`${flecha} ${trainData.tren} <span class="torn-label">(${trainInfo ? trainInfo.Torn || '-' : '-'})</span>`, {
+            }).bindTooltip(tooltipText, {
                 permanent: true,
                 direction: 'top',
                 offset: [4, -15],
