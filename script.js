@@ -149,7 +149,7 @@ function getOrderedItinerary(train) {
     if (indexActual === -1) return false;
     
     let coincidencias = 0;
-    let minCoincidenciasRequerides = Math.min(2, properes.length);
+    let minCoincidenciasRequeridas = Math.min(2, properes.length);
     
     for (let i = 0; i < properes.length; i++) {
       const indexItinerario = indexActual + i + 1;
@@ -157,7 +157,7 @@ function getOrderedItinerary(train) {
       
       if (properes[i] === itinerario[indexItinerario].estacio) {
         coincidencias++;
-        if (coincidencias >= minCoincidenciasRequerides) return true;
+        if (coincidencias >= minCoincidenciasRequeridas) return true;
       } else {
         break;
       }
@@ -248,7 +248,7 @@ function getOrderedItinerary(train) {
                         puntuacion += 5;
                     }
                     
-                    if (verificarSecuenciaParadas(properes, itinerarioOrdenado, estacio)) {
+                    if (verificarSecuenciaParades(properes, itinerarioOrdenado, estacio)) {
                         puntuacion += 10;
                     }
                     
@@ -286,6 +286,7 @@ function getOrderedItinerary(train) {
   function updateMapMarkers() {
     markersLayer.clearLayers();
     let count = 0;
+    accumulatedDelayMap.clear(); // Reiniciar el mapa de retards acumulats a cada refresc
     
     idToTrainMap.forEach((trainData, id) => {
         const [lng, lat] = trainData.coordinates;
@@ -293,23 +294,45 @@ function getOrderedItinerary(train) {
             const trainInfo = itineraryList.find(t => t.Tren === trainData.tren);
             const flecha = trainInfo && trainInfo['A/D'] === "A" ? "🔼" : "🔽";
             
+            // Calcular retard acumulat
+            let accumulatedDelay = 0;
+            let lastRealTime = null;
+            let lastScheduledTime = null;
+            let lastPassedStationIndex = -1;
+            let lastPassedStationName = null;
+            let horaActual = getHoraActual();
+            let parades = trainInfo ? getOrderedItinerary(trainInfo) : [];
+            // Trobar l'última estació passada (la més propera a l'hora actual, però no futura)
+            for (let i = 1; i < parades.length; i++) { // Comencem a la segona estació
+                const parada = parades[i];
+                const horaPrevista = parseHora(parada.hora);
+                if (horaPrevista <= horaActual) {
+                    lastPassedStationIndex = i;
+                    lastPassedStationName = parada.estacio;
+                } else {
+                    break;
+                }
+            }
+            // Calcular el retard acumulat fins a l'última estació passada
+            let delays = [];
+            for (let i = 1; i <= lastPassedStationIndex; i++) {
+                const parada = parades[i];
+                const horaPrevista = parseHora(parada.hora);
+                // Suposem que el tren ha passat per l'estació a l'hora actual (no tenim hora real exacta, només podem estimar)
+                // Si vols usar una altra font d'hora real, canvia aquí
+                let horaReal = horaPrevista; // Per defecte, igual a la prevista
+                if (i === lastPassedStationIndex) {
+                    horaReal = horaActual;
+                }
+                const diffMin = Math.round((horaReal - horaPrevista) / 60000);
+                accumulatedDelay += diffMin;
+                delays.push({estacio: parada.estacio, delay: accumulatedDelay});
+            }
+            accumulatedDelayMap.set(trainData.tren, accumulatedDelay);
             // Obtener la hora de paso si existe la próxima parada
             let horaPaso = '';
             if (trainData.proximaParada && trainInfo) {
                 horaPaso = trainInfo[trainData.proximaParada] || '';
-            }
-
-            // Calcular retard acumulat
-            let retardAcumulat = calcularRetardAcumulat(trainInfo, trainData);
-            let retardAcumulatHTML = '';
-            if (retardAcumulat !== null) {
-                if (retardAcumulat >= 2) {
-                    retardAcumulatHTML = `<br><span class="label">Retard acumulat:</span> <span class="value" style="color:red;">+${retardAcumulat} min</span>`;
-                } else if (retardAcumulat <= -2) {
-                    retardAcumulatHTML = `<br><span class="label">Avanç acumulat:</span> <span class="value" style="color:green;">${retardAcumulat} min</span>`;
-                } else {
-                    retardAcumulatHTML = `<br><span class="label">A temps acumulat</span>`;
-                }
             }
 
             let retardHTML = '';
@@ -324,11 +347,17 @@ function getOrderedItinerary(train) {
 
               if (!isNaN(diffMin)) {
                 if (diffMin >= 2) {
-                  retardHTML = `<br><span class="label">Retard:</span> <span class="value" style="color:red;">+${diffMin} min</span>`;
+                  retardHTML = `<br><span class="label">Retard instantani:</span> <span class="value" style="color:red;">+${diffMin} min</span>`;
                 } else {
                   retardHTML = `<br><span class="label">A temps</span>`;
                 }
               }
+            }
+
+            // Afegim el retard acumulat al popup
+            let accumulatedDelayHTML = '';
+            if (lastPassedStationIndex >= 1) {
+                accumulatedDelayHTML = `<br><span class="label">Retard acumulat:</span> <span class="value" style="color:${accumulatedDelay >= 2 ? 'red' : 'green'};">${accumulatedDelay >= 0 ? '+' : ''}${accumulatedDelay} min</span>`;
             }
 
             const proximaParada = trainData.proximaParada ? 
@@ -338,19 +367,16 @@ function getOrderedItinerary(train) {
                     ${horaPaso ? `<br><span class="label">Hora:</span> 
                     <span class="value">${horaPaso}</span>` : ''}
                     ${retardHTML}
-                    ${retardAcumulatHTML}
-                </div>` : '';
+                    ${accumulatedDelayHTML}
+                </div>` : accumulatedDelayHTML;
 
             // Añadir el campo tipus_unitat al popup
             const tipusUnitat = trainData.tipus_unitat || 'Desconegut';
     
             // Construir el texto del tooltip
             let tooltipText = `${flecha} ${trainData.tren}`;
-            if (retardAcumulatHTML && retardAcumulatHTML.includes('Retard acumulat')) {
-                const match = retardAcumulatHTML.match(/\+(\d+) min/);
-                if (match) {
-                    tooltipText += ` <span style=\"color:red;\">(+${match[1]} min)</span>`;
-                }
+            if (accumulatedDelayHTML && accumulatedDelay >= 2) {
+                tooltipText += ` <span style=\"color:red;\">(+${accumulatedDelay} min)</span>`;
             }
     
             const marker = L.marker([lat, lng], {
@@ -359,7 +385,7 @@ function getOrderedItinerary(train) {
                 permanent: true,
                 direction: 'top',
                 offset: [4, -15],
-                /*className: trainData.en_hora === true ? 'leaflet-tooltip tooltip-verde' : 'leaflet-tooltip tooltip-vermell'*/                className: getTooltipColor(trainData, trainInfo, retardHTML)
+                className: getTooltipColor(trainData, trainInfo, retardHTML)
               }).bindPopup(`
                 <div class="custom-popup">
                     <h3>🚆 <a href="#" onclick="showItinerary('${trainData.tren}'); return false;">Tren ${trainData.tren}</a></h3>
@@ -377,7 +403,7 @@ function getOrderedItinerary(train) {
                     ${getColorInfo(trainData.tren)}
                 </div>
             `, {
-                offset: L.point(4, 0)  // Desplaza el popup 20 píxeles hacia arriba
+                offset: L.point(4, 0)
             });
             
             markersLayer.addLayer(marker);
@@ -695,37 +721,4 @@ function refreshColors() {
     .catch((error) => {
       console.error('Error al refrescar colors:', error);
     });
-}
-
-// Calcula el retard acumulat d'un tren fins a la parada actual
-function calcularRetardAcumulat(trainInfo, trenData) {
-    if (!trainInfo) return null;
-    const itinerari = getOrderedItinerary(trainInfo);
-    let retardAcumulat = 0;
-    let paradaActual = trenData.proximaParada;
-    if (!paradaActual) return null;
-    // Busquem la posició de la parada actual
-    let indexActual = itinerari.findIndex(p => p.estacio === paradaActual);
-    if (indexActual === -1) return null;
-    // Comencem a la segona parada (index 1)
-    let horaRealAnterior = null;
-    for (let i = 1; i <= indexActual; i++) {
-        const parada = itinerari[i];
-        const horaPrevista = parada.hora;
-        if (!horaPrevista) continue;
-        // Suposem que només tenim l'hora real de la parada actual (trenData)
-        let horaReal;
-        if (i === indexActual) {
-            // Hora real: ara mateix
-            const ara = new Date();
-            horaReal = ara.getHours() * 60 + ara.getMinutes();
-        } else {
-            // Per parades anteriors, no tenim hora real, fem servir la prevista més el retard acumulat fins ara
-            horaReal = timeToMinutes(itinerari[i].hora) + retardAcumulat;
-        }
-        const previstaMin = timeToMinutes(horaPrevista);
-        const diff = horaReal - previstaMin;
-        retardAcumulat += diff;
-    }
-    return retardAcumulat;
 }
