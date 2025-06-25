@@ -142,7 +142,7 @@ function getOrderedItinerary(train) {
   return sortResultsByTime(parades);
   
 }
-  function verificarSecuenciaParadas(properes, itinerario, estacioActual) {
+  function verificarSecuenciaParades(properes, itinerario, estacioActual) {
     if (properes.length === 0 || itinerario.length === 0) return false;
     
     const indexActual = itinerario.findIndex(p => p.estacio === estacioActual);
@@ -201,7 +201,7 @@ function getOrderedItinerary(train) {
                 const diffMin = Math.abs((horaEst - horaActual) / 60000);
 
                 if (diffMin <= 10 && (estacio === estacioActual || properes.includes(estacio))) {
-                    if (estacio === estacioActual || verificarSecuenciaParadas(properes, itinerarioOrdenado, estacio)) {
+                    if (estacio === estacioActual || verificarSecuenciaParades(properes, itinerarioOrdenado, estacio)) {
                         coincideEnTiempoYSecuencia = true;
                         matches.push({
                             tren: trenNom,
