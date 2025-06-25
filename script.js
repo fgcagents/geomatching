@@ -248,7 +248,7 @@ function getOrderedItinerary(train) {
                         puntuacion += 5;
                     }
                     
-                    if (verificarSecuenciaParadas(properes, itinerarioOrdenado, estacio)) {
+                    if (verificarSecuenciaParades(properes, itinerarioOrdenado, estacio)) {
                         puntuacion += 10;
                     }
                     
@@ -299,6 +299,8 @@ function getOrderedItinerary(train) {
                 horaPaso = trainInfo[trainData.proximaParada] || '';
             }
 
+            // --- INICI: càlcul retard acumulat ---
+            let retardAcumulat = trainData.retardAcumulat || 0;
             let retardHTML = '';
             if (horaPaso) {
               const [h, m] = horaPaso.split(':').map(Number);
@@ -310,13 +312,33 @@ function getOrderedItinerary(train) {
               const diffMin = Math.round(diffMs / 60000);
 
               if (!isNaN(diffMin)) {
-                if (diffMin >= 2) {
-                  retardHTML = `<br><span class="label">Retard:</span> <span class="value" style="color:red;">+${diffMin} min</span>`;
+                // Calculem la diferència respecte l'última parada
+                // Si la parada ha canviat, actualitzem el retard acumulat
+                if (trainData.lastParada !== trainData.proximaParada) {
+                  // Si és la primera vegada, inicialitzem
+                  if (typeof trainData.retardAcumulat === 'undefined') {
+                    retardAcumulat = diffMin;
+                  } else {
+                    // Suma la diferència de la nova parada
+                    retardAcumulat += diffMin - (trainData.lastDiffMin || 0);
+                  }
+                  trainData.lastParada = trainData.proximaParada;
+                  trainData.lastDiffMin = diffMin;
+                  trainData.retardAcumulat = retardAcumulat;
+                } else {
+                  // Si no ha canviat la parada, mantenim el valor
+                  retardAcumulat = trainData.retardAcumulat;
+                }
+                if (retardAcumulat >= 2) {
+                  retardHTML = `<br><span class="label">Retard acumulat:</span> <span class="value" style="color:red;">+${retardAcumulat} min</span>`;
+                } else if (retardAcumulat <= -2) {
+                  retardHTML = `<br><span class="label">Avanç acumulat:</span> <span class="value" style="color:green;">${retardAcumulat} min</span>`;
                 } else {
                   retardHTML = `<br><span class="label">A temps</span>`;
                 }
               }
             }
+            // --- FI: càlcul retard acumulat ---
 
             const proximaParada = trainData.proximaParada ? 
                 `<div class="info-row">
@@ -337,6 +359,11 @@ function getOrderedItinerary(train) {
                 const match = retardHTML.match(/\+(\d+) min/);
                 if (match) {
                     tooltipText += ` <span style=\"color:red;\">(+${match[1]} min)</span>`;
+                }
+            } else if (retardHTML && retardHTML.includes('Avanç')) {
+                const match = retardHTML.match(/(-?\d+) min/);
+                if (match) {
+                    tooltipText += ` <span style=\"color:green;\">(${match[1]} min)</span>`;
                 }
             }
     
