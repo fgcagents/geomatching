@@ -149,7 +149,7 @@ function getOrderedItinerary(train) {
     if (indexActual === -1) return false;
     
     let coincidencias = 0;
-    let minCoincidenciasRequeridas = Math.min(2, properes.length);
+    let minCoincidenciasRequerides = Math.min(2, properes.length);
     
     for (let i = 0; i < properes.length; i++) {
       const indexItinerario = indexActual + i + 1;
@@ -157,7 +157,7 @@ function getOrderedItinerary(train) {
       
       if (properes[i] === itinerario[indexItinerario].estacio) {
         coincidencias++;
-        if (coincidencias >= minCoincidenciasRequeridas) return true;
+        if (coincidencias >= minCoincidenciasRequerides) return true;
       } else {
         break;
       }
@@ -201,7 +201,7 @@ function getOrderedItinerary(train) {
                 const diffMin = Math.abs((horaEst - horaActual) / 60000);
 
                 if (diffMin <= 10 && (estacio === estacioActual || properes.includes(estacio))) {
-                    if (estacio === estacioActual || verificarSecuenciaParadas(properes, itinerarioOrdenado, estacio)) {
+                    if (estacio === estacioActual || verificarSecuenciaParades(properes, itinerarioOrdenado, estacio)) {
                         coincideEnTiempoYSecuencia = true;
                         matches.push({
                             tren: trenNom,
