@@ -310,7 +310,7 @@ function getOrderedItinerary(train) {
               const diffMin = Math.round(diffMs / 60000);
 
               if (!isNaN(diffMin)) {
-                if (diffMin > 0) {
+                if (diffMin >= 2) {
                   retardHTML = `<br><span class="label">Retard:</span> <span class="value" style="color:red;">+${diffMin} min</span>`;
                 } else {
                   retardHTML = `<br><span class="label">A temps</span>`;
