@@ -41,12 +41,21 @@ const trainIcon = L.divIcon({
          attribution: "&copy; J_E_O <a href=\"https://www.jawg.io?utm_medium=map&utm_source=attribution\" target=\"_blank\">&copy; Jawg</a> - <a href=\"https://www.openstreetmap.org?utm_medium=map-attribution&utm_source=jawg\" target=\"_blank\">&copy; OpenStreetMap</a>&nbsp;contributors"
       }).addTo(map);
 
+
       // Capa de vías férreas de OpenRailwayMap 
-      L.tileLayer('https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
+      /*L.tileLayer('https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a>',
         maxZoom: 19,
         opacity: 0.7
+      }).addTo(map);*/
+
+      // Capa de vías férreas de OpenRailwayMap 
+      L.tileLayer('https://tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=55ae097f8c1b4658b54ffa5ecba0cc97', {
+        //attribution: '&copy; <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a>',
+        maxZoom: 19,
+        opacity: 0.7
       }).addTo(map);
+
 
       markersLayer.addTo(map);
     }
