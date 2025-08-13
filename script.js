@@ -50,7 +50,7 @@ const trainIcon = L.divIcon({
       }).addTo(map);*/
 
       // Capa de vías férreas de OpenRailwayMap 
-      L.tileLayer('https://tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=55ae097f8c1b4658b54ffa5ecba0cc97', {
+      L.tileLayer('https://tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=55ae097f8c1b4658b54ffa5ecba0cc97', {
         //attribution: '&copy; <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a>',
         maxZoom: 19,
         opacity: 0.7
